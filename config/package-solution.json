@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "sharepoint-wb-ad-new-user-form-client-side-solution",
+    "id": "f49c3150-572d-43bc-8cbb-a61f0e965c80",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.13.0"
+    }
+  },
+  "paths": {
+    "zippedPackage": "solution/sharepoint-wb-ad-new-user-form.sppkg"
+  }
+}

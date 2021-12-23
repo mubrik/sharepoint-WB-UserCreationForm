@@ -1,0 +1,13 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "environment": "spo",
+    "version": "1.13.0",
+    "libraryName": "sharepoint-wb-ad-new-user-form",
+    "libraryId": "f49c3150-572d-43bc-8cbb-a61f0e965c80",
+    "packageManager": "npm",
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

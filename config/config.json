@@ -1,0 +1,19 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "ad-new-user-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/adNewUserForm/AdNewUserFormWebPart.js",
+          "manifest": "./src/webparts/adNewUserForm/AdNewUserFormWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "AdNewUserFormWebPartStrings": "lib/webparts/adNewUserForm/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+  }
+}
