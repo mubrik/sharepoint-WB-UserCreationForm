@@ -10,10 +10,11 @@ import { IFullFormData } from "../../types/custom";
 
 interface IComponentProps {
   formData: IFullFormData;
-  setFormData: <T extends keyof IFullFormData, A>(key: T, value: A) => void
+  setFormData: <T extends keyof IFullFormData, A>(key: T, value: A) => void;
+  disabled?: boolean;
 }
 
-export default ({ formData, setFormData }: IComponentProps): JSX.Element => {
+export default ({ formData, setFormData, disabled }: IComponentProps): JSX.Element => {
 
   const handleItemChecked = (item: string, isChecked?: boolean) => {
     // get form data
@@ -35,20 +36,23 @@ export default ({ formData, setFormData }: IComponentProps): JSX.Element => {
   return(
     <Stack tokens={{childrenGap : 8 }}>
       <Label> Hardware Required: </Label>
-      <Checkbox 
+      <Checkbox
+        disabled={disabled} 
         label={"Mobile Phone"}
         onChange={(_, checked) => handleItemChecked("phone", checked)}
-        defaultChecked={formData.hardware.includes("phone")}
+        checked={formData.hardware.includes("phone")}
       />
-      <Checkbox 
+      <Checkbox
+        disabled={disabled}  
         label={"Laptop"} 
         onChange={(_, checked) => handleItemChecked("laptop", checked)}
-        defaultChecked={formData.hardware.includes("laptop")}
+        checked={formData.hardware.includes("laptop")}
       />
-      <Checkbox 
+      <Checkbox
+        disabled={disabled}  
         label={"Desktop"} 
         onChange={(_, checked) => handleItemChecked("desktop", checked)}
-        defaultChecked={formData.hardware.includes("desktop")}
+        checked={formData.hardware.includes("desktop")}
       />
     </Stack>
   );

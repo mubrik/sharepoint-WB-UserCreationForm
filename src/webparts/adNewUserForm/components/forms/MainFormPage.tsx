@@ -6,7 +6,9 @@ import {
   IconButton
 } from "office-ui-fabric-react";
 // data
-import { IFullFormData, keysOfFullFormData } from "../../types/custom";
+import { IFullFormData, keysOfFullFormData,
+  formSettings
+} from "../../types/custom";
 // validator
 import validator from "../validator/validator";
 // custom comp
@@ -52,55 +54,133 @@ const initialMainFormData: IFullFormData  = {
 // layout type
 type paneLayoutState = "double" | "single";
 
-export default (): JSX.Element => {
+interface IComponentProps {
+  formSetting: formSettings;
+  setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
+}
+
+export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element => {
 
   // layout state
   const [layoutState, setLayoutState] = React.useState<paneLayoutState>("double");
   const [formIsValid, setFormIsValid] = React.useState(false);
   const [formIsLoading, setFormIsLoading] = React.useState(false);
+  const [formIsTouched, setFormIsTouched] = React.useState(false);
+  // controlled form data
+  // state changes causing a lot of mainpage re render, move to seperate comp and use context?
+  const [formData, setFormData] = React.useState(initialMainFormData);
+  console.log("render mainpage");
   // responsive
   const isWideScreen = useMediaQuery({ maxWidth: 820 });
   // notify
   const notify = useNotification();
   // user
   const { displayName } = useUserData();
-  // controlled form data
-  const [formData, setFormData] = React.useState(initialMainFormData);
 
   // effect for validation notification
   React.useEffect(() => {
-    const [isValid, isError, msg] = validator(formData);
-
-    if (isError) {
-      setFormIsValid(false);
-      notify({msg: msg, isError: true, show: true, errorObj: null});
-    } else {
-      setFormIsValid(true);
-      notify({msg: "", isError: false, show: false, errorObj: null});
+    // only validate if form is touched
+    if (formIsTouched && formSetting.mode === "new") {
+      // validate
+      const [isValid, isError, msg] = validator(formData);
+      
+      if (isError) {
+        notify({msg: msg, isError: true, show: true, errorObj: null});
+      } else {
+        notify({msg: "", isError: false, show: false, errorObj: null});
+      }
+      setFormIsValid(isValid);
     }
+  }, [formIsTouched, formData, formSetting]);
 
-    console.log(isValid, isError, msg);
-  }, [formData])
+  // effect for fetching
+  React.useEffect(() => {
+    if (formSetting.mode === "readOnly") {
+      // fetch data
+      if (formSetting.id) {
+        fetchServer.getListItemById(formSetting.id)
+        .then(result => {
+          console.log(result);
+          setFormData({
+            id: result.Id,
+            title: result.Title,
+            firstName: result.FirstName,
+            lastName: result.LastName,
+            initials: result.Initials ? result.Initials : "",
+            privateEmail: result.PrivateEmail,
+            privateNumber: result.PrivateNumber,
+            mobileNumber: result.MobileNumber,
+            address: result.Address,
+            city: result.City,
+            country: result.Country,
+            jobTitle: result.JobTitle,
+            office: result.Office,
+            department: result.Department,
+            supervisorEmail: result.SupervisorEmail,
+            dangoteEmail: result.DangoteEmail,
+            directReports: result.DirectReports,
+            salaryLevel: result.SalaryGrade,
+            salaryStep: result.SalaryStep,
+            businessJustification: result.BusinessJustification,
+            staffReplaced: result.StaffReplaced ? result.StaffReplaced : "",
+            hardware: result.Hardware,
+          });
+        })
+        .catch(error => {
+          if (error instanceof Error) {
+            notify({show: true, msg: "Error Getting Item, Try Again", errorObj: error, isError: true, type: "error"});
+          }
+        })
+      }
+      // set data
+    }
+  }, [formSetting]);
+
+  // effect to run on unmount
+  React.useEffect(() => {
+    if (formSetting.mode === "readOnly" && formData.id){
+      return () => setFormSetting({
+        mode: "new"
+      });
+    }
+  }, [formSetting, formData]);
+
+  
 
   // handler for all sub comp, TS hack? but i think i know what i'm doing lol
-  const handleInputChange = <T extends keysOfFullFormData, A>( key:T, value: A) => {
-    // set form data
-    setFormData(prevValue => {
-      return {
-        ...prevValue,
-        [key]: value
-      }
-    })
-  };
+  // memoised cause will be passed down 
+  const handleInputChange = React.useCallback(
+    <T extends keysOfFullFormData, A>( key:T, value: A) => {
+      // set touched
+      setFormIsTouched(true);
+      // set form data
+      setFormData(prevValue => {
+        return {
+          ...prevValue,
+          [key]: value
+        }
+      })
+    }, []
+  );
 
   // handle submit
   const handleSubmit = (): void => {
+    // loading
     setFormIsLoading(true);
+    // request
     fetchServer.createRequest(formData)
     .then(() => {
-      setFormIsLoading(false);
       notify({show: true, msg: "Request Created", errorObj: null});
+      // reset form, un comment when not testing
+      // setFormIsTouched(false);
+      // setFormData(initialMainFormData);
     })
+    .catch(error => {
+      if (error instanceof Error) {
+        notify({show: true, msg: "Error Creating Item", errorObj: error, isError: true, type: "error"});
+      }
+    })
+    .finally(() => setFormIsLoading(false));
   };
   // memo just for flex
   const iconProps = React.useMemo(() => {
@@ -137,6 +217,7 @@ export default (): JSX.Element => {
             <UserInfoForm
               layout={layoutState}
               formData={formData}
+              formSetting={formSetting}
               setFormData={handleInputChange}
             />
           </StackItem>
@@ -144,6 +225,7 @@ export default (): JSX.Element => {
             <BusinessInfoForm
               layout={layoutState}
               formData={formData}
+              formSetting={formSetting}
               setFormData={handleInputChange}
             />
           </StackItem>
@@ -156,6 +238,7 @@ export default (): JSX.Element => {
             <UserInfoForm
               layout={layoutState}
               formData={formData}
+              formSetting={formSetting}
               setFormData={handleInputChange}
             />
           }
@@ -163,18 +246,22 @@ export default (): JSX.Element => {
             <BusinessInfoForm
               layout={layoutState}
               formData={formData}
+              formSetting={formSetting}
               setFormData={handleInputChange}
             />
           }
         />
       }
-      <LoadingButton
-        disabled={!formIsValid || formIsLoading}
-        loading={formIsLoading}
-        loadingMsg={"Creating"}
-        text={"Submit"}
-        onClick={handleSubmit}
-      />
+      { 
+        formSetting.mode === "new" &&
+        <LoadingButton
+          disabled={!formIsValid || formIsLoading}
+          loading={formIsLoading}
+          loadingMsg={"Creating"}
+          text={"Submit"}
+          onClick={handleSubmit}
+        />
+      }
     </Stack>
   );
 };

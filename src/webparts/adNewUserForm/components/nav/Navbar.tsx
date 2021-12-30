@@ -6,6 +6,8 @@ import {
 } from "office-ui-fabric-react";
 // types
 import { mainPageView } from "../../types/custom";
+// user
+import { useUserData } from "../userContext/UserContext";
 // query
 import { useMediaQuery } from "react-responsive";
 
@@ -23,6 +25,8 @@ export interface IComponentProps {
 
 export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
   
+  // user
+  const { isUserApproverOne } = useUserData();
   // responsive
   const medium = useMediaQuery({ maxWidth: 600 });
   // nav button menu props
@@ -39,9 +43,20 @@ export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
         text: 'About',
         iconProps: { iconName: 'View' },
         onClick: () => setPageState("about")
-      },
+      }
     ],
   };
+
+  if (isUserApproverOne) {
+    menuProps.items.push(
+      {
+        key: 'approval',
+        text: 'Approval',
+        iconProps: { iconName: 'View' },
+        onClick: () => setPageState("approval1")
+      }
+    )
+  }
 
   return (
     <Stack>
@@ -64,6 +79,7 @@ export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
           selectedKey={pageState}
         >
           <PivotItem headerText="New User" itemKey="new" />
+          {isUserApproverOne && <PivotItem headerText="Approvals" itemKey="approval1" />}
           <PivotItem headerText="About" itemKey="about" />
         </Pivot>
       }

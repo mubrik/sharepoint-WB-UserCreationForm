@@ -3,13 +3,14 @@ import * as React from 'react';
 import { Stack } from 'office-ui-fabric-react';
 // types
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
-import { mainPageView, IWebPartData } from '../types/custom';
+import { mainPageView, IWebPartData, formSettings } from '../types/custom';
 // custom component
 import Navbar from "./nav/Navbar";
 import NotificationContext from "./notification/NotificationBarContext";
 import UserContext from "./userContext/UserContext";
 import AboutPage from "./about/AboutPage";
 import MainFormPage from "./forms/MainFormPage";
+import ApprovalPage from './approval/ApprovalPage';
 import ErrorBoundary from "./error/ErrorBoundary";
 
 // types
@@ -25,8 +26,10 @@ export const WebpartContext = React.createContext<IWebPartData>({
 });
 
 export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
-
+  // state for the component being viewed except nav
   const [viewPage, setViewPage] = React.useState<mainPageView>("new");
+  // state for form mode
+  const [formSetting, setFormSetting] = React.useState<formSettings>({mode: "new"});
 
   // webpart width
   React.useEffect(() => {
@@ -57,7 +60,18 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
         <Navbar pageState={viewPage} setPageState={setViewPage}/>
         {
           viewPage === "new" &&
-          <MainFormPage />
+          <MainFormPage 
+            formSetting={formSetting}
+            setFormSetting={setFormSetting}
+          />
+        }
+        {
+          viewPage === "approval1" &&
+          <ApprovalPage
+            mainPageView={viewPage} 
+            setMainPageState={setViewPage}
+            setFormSetting={setFormSetting}
+          />
         }
         {
           viewPage === "about" &&

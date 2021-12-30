@@ -19,13 +19,15 @@ export interface INotificationBarState {
   isError?: boolean;
   errorObj?: Error|null;
   type?: NotificationType;
+  logError?: boolean;
 }
 
 const initialState = {
   show: false,
   msg: "",
   isError: false,
-  errorObj: null
+  errorObj: null,
+  logError: false
 };
 
 const [useNotification, NotificationProvider] =
@@ -35,9 +37,9 @@ export default ({children}:INotificationBarProps) :JSX.Element => {
   // state
   const [notifyState, setNotifyState] = React.useState<INotificationBarState>(initialState);
 
-  // effect to log error
+  // effect to log error to a server or db or something
   React.useEffect(() => {
-    if (notifyState.isError) {
+    if (notifyState.logError) {
       console.log("error logged", notifyState.errorObj);
     }
   }, [notifyState.isError]);

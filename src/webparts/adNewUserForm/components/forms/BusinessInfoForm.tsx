@@ -7,19 +7,19 @@ import {
   StackItem,
 } from "office-ui-fabric-react";
 // types
-import type { IFullFormData, keysOfFullFormData } from "../../types/custom";
+import type { IFullFormData, 
+  keysOfFullFormData, formSettings
+} from "../../types/custom";
 // custom comp
 import ResponsiveTextField from "../utils/ResponsiveTextField";
 import PeoplePickerComp from "../utils/PeoplePickerComp";
 import CustomMultiCheckBox from "../utils/CustomMultiCheckBox";
 // query
 import { useMediaQuery } from "react-responsive";
+// utils
+import { pick } from "lodash";
 
-interface IComponentProps {
-  formData: IFullFormData;
-  setFormData: <T extends keysOfFullFormData, A>(key: T, value: A) => void;
-  layout: "single" | "double";
-}
+
 
 // list options for dropdowns
 const salaryGradeDropdownOpts: IDropdownOption[] = [];
@@ -63,13 +63,49 @@ for (let i = 0; i < 20; i++) {
   salaryStepDropdownOpts.push((step));
 }
 
+// for react memo
+const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) => {
+  // user form only cares for 
+  const userFormArr: keysOfFullFormData[] = [
+    "jobTitle", "office",
+    "department", "supervisorEmail",
+    "dangoteEmail", "directReports",
+    "salaryLevel", "salaryStep", "businessJustification",
+    "hardware", "staffReplaced"
+  ];
+  // compare
+  // layout first
+  if (prevProps.layout !== nextProps.layout) {
+    return false;
+  }
+  // filter
+  // guessing a dependecy installed lodash cause, not me
+  const previousPropsFiltered = pick(prevProps.formData, userFormArr);
+  // form props
+  for ( const [key, value] of Object.entries(previousPropsFiltered)) {
+    if (value !== nextProps.formData[key as keysOfFullFormData]) {
+      return false;
+    }
+  }
+  // equal, fucntion doesnt change? not checking, memory reference value might change but doesnt matter?
+  return true;
+}
+
+interface IComponentProps {
+  formData: IFullFormData;
+  formSetting: formSettings;
+  setFormData: <T extends keysOfFullFormData, A>(key: T, value: A) => void;
+  layout: "single" | "double";
+}
+
 // main component
-export default ({formData, setFormData, layout}: IComponentProps): JSX.Element => {
+export default React.memo(({formData, setFormData, layout, formSetting}: IComponentProps): JSX.Element => {
 
   // for alignment
   const horizAlign = layout === "single" ? "center" : undefined;
   // responsive
   const isWideScreen = useMediaQuery({ minWidth: 768});
+  console.log("render bisinfo");
 
   return(
     <Stack tokens={{childrenGap:8}}>
@@ -84,7 +120,8 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
           <>
             <Stack horizontal tokens={{ childrenGap: 8 }} verticalAlign={"end"}  horizontalAlign={horizAlign} >
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label="Business Justification"
                   selectedKey={formData.businessJustification}
                   options={businessJustificationOpts}
@@ -94,24 +131,30 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
               {
                 formData.businessJustification === "Job Replacement" &&
                 <StackItem grow={1}>
-                  <ResponsiveTextField 
+                  <ResponsiveTextField
+                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
                     prefix="Staff Being Replaced"
-                    defaultValue={formData.staffReplaced}
-                    onChange={(_, newValue) => {setFormData("staffReplaced", newValue as string)}}
+                    value={formData.staffReplaced}
+                    onChange={ formSetting.mode === "readOnly" ? 
+                      (_, newValue) => {setFormData("staffReplaced", newValue as string)}
+                      : undefined
+                    }
                   />
                 </StackItem>
               }
               <StackItem grow={1}>
                 <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Job Title"
-                  defaultValue={formData.jobTitle}
+                  value={formData.jobTitle}
                   onChange={(_, newValue) => {setFormData("jobTitle", newValue as string)}}
                 />
               </StackItem>
             </Stack>
             <Stack horizontal tokens={{childrenGap:8}}  horizontalAlign={horizAlign}>
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label="SBU"
                   selectedKey={formData.office}
                   options={sbuOpts}
@@ -119,18 +162,20 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 />
               </StackItem>
               <StackItem grow={1}>
-                <ResponsiveTextField 
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Department"
-                  defaultValue={formData.department}
+                  value={formData.department}
                   onChange={(_, newValue) => {setFormData("department", newValue as string)}}
                 />
               </StackItem>
             </Stack>
             <Stack horizontal tokens={{childrenGap:8}} horizontalAlign={horizAlign}>
               <StackItem grow={1}>
-                <ResponsiveTextField 
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Dangote Email"
-                  defaultValue={formData.dangoteEmail}
+                  value={formData.dangoteEmail}
                   onChange={(_, newValue) => {setFormData("dangoteEmail", newValue as string)}}
                   onGetErrorMessage={(value) => {
                     return value.includes("@") ? "" : "Error, Not an email"
@@ -149,7 +194,8 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
             </Stack>
             <Stack horizontal tokens={{childrenGap:8}} horizontalAlign={horizAlign}>
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label="Salary Grade"
                   selectedKey={formData.salaryLevel}
                   options={salaryGradeDropdownOpts}
@@ -157,7 +203,8 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 />
               </StackItem>
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label="Salary Step"
                   selectedKey={formData.salaryStep}
                   options={salaryStepDropdownOpts}
@@ -165,9 +212,10 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 />
               </StackItem>
               <StackItem grow={1} shrink>
-                <ResponsiveTextField 
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Direct Reports"
-                  defaultValue={formData.directReports}
+                  value={formData.directReports}
                   onChange={(_, newValue) => {setFormData("directReports", newValue as string)}}
                   type="number"
                   min={0}
@@ -179,6 +227,7 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
               <CustomMultiCheckBox
                 formData={formData}
                 setFormData={setFormData}
+                disabled={formSetting.mode === "readOnly" ? true : undefined}
               />
             </Stack>
           </>
@@ -188,7 +237,8 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
           <>
             <Stack horizontal={isWideScreen ? true : undefined} wrap tokens={{ childrenGap: 8 }} verticalAlign={"end"}>
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
                   label="Business Justification"
                   selectedKey={formData.businessJustification}
                   options={businessJustificationOpts}
@@ -198,24 +248,27 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 {
                   formData.businessJustification === "Job Replacement" &&
                   <StackItem grow={1}>
-                    <ResponsiveTextField 
+                    <ResponsiveTextField
+                      readOnly={formSetting.mode === "readOnly" ? true : undefined}
                       prefix="Staff Replaced"
-                      defaultValue={formData.staffReplaced}
+                      value={formData.staffReplaced}
                       onChange={(_, newValue) => {setFormData("staffReplaced", newValue as string)}}
                     />
                   </StackItem>
                 }
               <StackItem grow={1}>
                 <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Job Title"
-                  defaultValue={formData.jobTitle}
+                  value={formData.jobTitle}
                   onChange={(_, newValue) => {setFormData("jobTitle", newValue as string)}}
                 />
               </StackItem>
             </Stack>
             <Stack horizontal={isWideScreen ? true : undefined} wrap tokens={{ childrenGap: 8 }}>
               <StackItem grow={2}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
                   label="SBU"
                   selectedKey={formData.office}
                   options={sbuOpts}
@@ -223,16 +276,18 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 />
               </StackItem>
               <StackItem grow={1}>
-                <ResponsiveTextField 
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Department"
-                  defaultValue={formData.department}
+                  value={formData.department}
                   onChange={(_, newValue) => {setFormData("department", newValue as string)}}
                 />
               </StackItem>
               <StackItem grow={1}>
-                <ResponsiveTextField 
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Dangote Email"
-                  defaultValue={formData.dangoteEmail}
+                  value={formData.dangoteEmail}
                   onChange={(_, newValue) => {setFormData("dangoteEmail", newValue as string)}}
                   onGetErrorMessage={(value) => {
                     return value.includes("@") ? "" : "Error, Not an email"
@@ -243,9 +298,10 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 />
               </StackItem>
               <StackItem grow={1}>
-                <ResponsiveTextField 
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Direct Reports"
-                  defaultValue={formData.directReports}
+                  value={formData.directReports}
                   onChange={(_, newValue) => {setFormData("directReports", newValue as string)}}
                   type="number"
                   min={0}
@@ -261,7 +317,8 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
             </Stack>
             <Stack horizontal={isWideScreen ? true : undefined} wrap tokens={{ childrenGap: 8 }}>
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
                   label="Salary Grade"
                   selectedKey={formData.salaryLevel}
                   options={salaryGradeDropdownOpts}
@@ -269,7 +326,8 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
                 />
               </StackItem>
               <StackItem grow={1}>
-                <Dropdown 
+                <Dropdown
+                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
                   label="Salary Step"
                   selectedKey={formData.salaryStep}
                   options={salaryStepDropdownOpts}
@@ -278,6 +336,7 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
               </StackItem>
               <StackItem grow={1}>
                 <CustomMultiCheckBox
+                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   formData={formData}
                   setFormData={setFormData}
                 />
@@ -288,4 +347,4 @@ export default ({formData, setFormData, layout}: IComponentProps): JSX.Element =
       </Stack>
     </Stack>
   );
-};
+}, arePropsEqual);

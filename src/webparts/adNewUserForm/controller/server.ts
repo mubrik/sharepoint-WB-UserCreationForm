@@ -10,7 +10,10 @@ import { IEmailProperties } from "@pnp/sp/sputilities";
 // types
 import { 
   IServer, IUserData,
-  IFullFormData
+  IFullFormData,
+  ISharepointFullFormData,
+  mainPageView, ISharepointApprovalData,
+  approvalStatus
 } from "../types/custom";
 
 
@@ -40,7 +43,6 @@ class Server implements IServer{
         await Promise.allSettled([
           this.fetch.profiles.myProperties.get(),
           this.fetch.web.currentUser(),
-          this.fetch.web.currentUser.groups()
         ]);
       // error check
       userDetails.forEach((promise) => {
@@ -55,11 +57,10 @@ class Server implements IServer{
       // somehow, typescript doesnt figure out the promise is fufilled after error check
       // typescript issue 42012 on github, i'll keep this here for now in case it gets updated, but imlement differently
 
-      const [_profile, _user, _groups] = userDetails;
+      const [_profile, _user,] = userDetails;
 
       const profile = _profile.status === "fulfilled" ? _profile.value : null;
       const user = _user.status === "fulfilled" ? _user.value : null;
-      const groups = _groups.status === "fulfilled" ? _groups.value : null;
       
       // vars
       const managersArr: string[] = profile.ExtendedManagers;
@@ -81,17 +82,10 @@ class Server implements IServer{
         manager = managerProfile.Email;
       }
 
-      // groups
-      // arr
-      const grpArr: string[] = [];
-      // loop groups
-      if (groups){
-        groups.forEach(grpObj => grpArr.push(grpObj.Title));
-      }
+      // approver status
       // vars
-      const isUserHr = grpArr.includes("HR Approvers");
-      const isUserManager = grpArr.includes("LineManagers Approvers");
-      const isUserGroupHead = grpArr.includes("GroupHeads Approvers");
+      const isUserApproverOne = await this.getApproverOne(profile.Email);
+
 
       // return
       return {
@@ -100,9 +94,7 @@ class Server implements IServer{
         displayName: profile.DisplayName,
         manager: manager,
         jobTitle: profile.Title,
-        isUserHr,
-        isUserManager,
-        isUserGroupHead
+        isUserApproverOne
       };
     } catch (error) {
       console.log(error);
@@ -113,6 +105,82 @@ class Server implements IServer{
     }
 
   }
+
+  public getListItemById = async (id: number): Promise<ISharepointFullFormData> => {
+    
+    return new Promise((resolve, reject) => {
+      this.adCreateList.items.getById(id).get()
+      .then(result => resolve(result))
+      .catch(error => reject(error));
+    });
+  }
+
+  public getApproverOneList = async (username:string): Promise<ISharepointFullFormData[]> => {
+    // filter by username
+    return new Promise((resolve, reject) => {
+      this.adCreateList.items
+      .select() // filter only necessary field later
+      .filter("Approver1 eq '" + username + "'")
+      .get()
+      .then(result => {
+        // if item not present, user is not an approver
+        console.log(result);
+        resolve(result);
+      })
+      .catch(error => {
+        // just resolve false for now
+        reject(error);
+      })
+    });
+  }
+  
+  public getApproverOne = async (username:string): Promise<boolean> => {
+    // filter if user email is in approver column
+    return new Promise((resolve, reject) => {
+      this.adCreateList.items.select()
+      .top(1) // only need 1 to verify if user an approver
+      .filter("Approver1 eq '" + username + "'").get()
+      .then(result => {
+        // if item not present, user is not an approver
+        if (result.length === 0) {
+          resolve(false);
+        }
+        resolve(true);
+      })
+      .catch(error => {
+        // just resolve false for now
+        resolve(false);
+      })
+    });
+  }
+
+  public approveRejectEntry =
+    async (id: number, page: mainPageView, status: approvalStatus): Promise<boolean> => {
+
+    return new Promise((resolve, reject) => {
+      // get date
+      // const _date = new Date();
+      // obj to update
+      const updateObj:ISharepointApprovalData = {};
+      // mutate obj
+      switch(page) {
+        case "approval1" :
+          updateObj["Approver1Status"] = status;
+          break;
+
+        default:
+          break;
+      }
+
+      this.adCreateList.items.getById(id).update(updateObj)
+        .then(_ => {
+          resolve(true);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+    }
 
   public createRequest = async ( data: IFullFormData): Promise<boolean> => {
 
@@ -141,13 +209,15 @@ class Server implements IServer{
         StaffReplaced: data.staffReplaced,
         Hardware: data.hardware,
       })
-      .then(res => {resolve(true)})
-      .catch(res => {
-        console.log(res);
-        reject(false)
-      })
+      .then(_ => resolve(true))
+      .catch(error => {
+        if (error instanceof Error) {
+          reject(error);
+        }
+      });
     });
   }
+
 
   public sendFeedback = (email: string, rating: number, feedback: string): Promise<boolean> => {
 
