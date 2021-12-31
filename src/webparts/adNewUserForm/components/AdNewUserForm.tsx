@@ -34,7 +34,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
   // webpart width
   React.useEffect(() => {
     try {
-      const bench = document.getElementById("workbenchPageContent")
+      const bench = document.getElementById("workbenchPageContent");
       if (bench) {
         bench.style.maxWidth = "1920px";
       }
@@ -48,8 +48,8 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
     return {
       context,
       webpartWidth
-    }
-  }, [context, webpartWidth])
+    };
+  }, [context, webpartWidth]);
 
   return(
     <ErrorBoundary>

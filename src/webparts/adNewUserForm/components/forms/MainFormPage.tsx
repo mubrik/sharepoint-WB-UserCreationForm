@@ -1,9 +1,9 @@
 // Page for hosting form, holds data state
 import * as React from "react";
 import {
-  Stack, PrimaryButton,
+  Stack, Separator,
   StackItem, Label,
-  IconButton
+  IconButton, mergeStyles
 } from "office-ui-fabric-react";
 // data
 import { IFullFormData, keysOfFullFormData,
@@ -17,8 +17,6 @@ import BusinessInfoForm from "./BusinessInfoForm";
 import LoadingButton from "../utils/LoadingButton";
 // hooks
 import { useUserData } from "../userContext/UserContext";
-// layout
-import SplitPaneLayout from "../layout/SplitPaneLayout";
 // query
 import { useMediaQuery } from "react-responsive";
 // notification 
@@ -49,7 +47,7 @@ const initialMainFormData: IFullFormData  = {
   businessJustification: "New Work Scope",
   staffReplaced: "",
   hardware: "",
-}
+};
 
 // layout type
 type paneLayoutState = "double" | "single";
@@ -58,6 +56,11 @@ interface IComponentProps {
   formSetting: formSettings;
   setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
 }
+
+// class style
+const verticalStyle = mergeStyles({
+  height: '400px',
+});
 
 export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element => {
 
@@ -71,7 +74,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   const [formData, setFormData] = React.useState(initialMainFormData);
   console.log("render mainpage");
   // responsive
-  const isWideScreen = useMediaQuery({ maxWidth: 820 });
+  const isMediumScreen = useMediaQuery({ maxWidth: 820 });
   // notify
   const notify = useNotification();
   // user
@@ -130,7 +133,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
           if (error instanceof Error) {
             notify({show: true, msg: "Error Getting Item, Try Again", errorObj: error, isError: true, type: "error"});
           }
-        })
+        });
       }
       // set data
     }
@@ -138,14 +141,13 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
 
   // effect to run on unmount
   React.useEffect(() => {
+    // set form mode back to new
     if (formSetting.mode === "readOnly" && formData.id){
       return () => setFormSetting({
         mode: "new"
       });
     }
   }, [formSetting, formData]);
-
-  
 
   // handler for all sub comp, TS hack? but i think i know what i'm doing lol
   // memoised cause will be passed down 
@@ -158,8 +160,8 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
         return {
           ...prevValue,
           [key]: value
-        }
-      })
+        };
+      });
     }, []
   );
 
@@ -187,8 +189,8 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     return {
       iconName: layoutState === "double" ? "OpenPane" : "ClosePane",
       title: layoutState === "double" ? "OpenPane" : "ClosePane",
-    }
-  }, [layoutState])
+    };
+  }, [layoutState]);
  
 
   return(
@@ -198,20 +200,10 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
           Hello {displayName ? displayName : ""}
         </Label>
       </StackItem>
-      <StackItem align="end">
-        <IconButton 
-          iconProps={iconProps}
-          onClick={() => {
-            layoutState === "double" ? setLayoutState("single") : setLayoutState("double")
-          }}
-        />
-      </StackItem>
-      { 
-        // if layout in double page
-        layoutState === "double" &&
+      <StackItem grow>
         <Stack 
           tokens={{childrenGap : 12}}
-          horizontal={isWideScreen ? undefined : true}
+          horizontal={ isMediumScreen ? undefined : true}
         > 
           <StackItem grow>
             <UserInfoForm
@@ -220,6 +212,9 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
               formSetting={formSetting}
               setFormData={handleInputChange}
             />
+          </StackItem>
+          <StackItem className={ isMediumScreen ? undefined : verticalStyle}>
+            <Separator vertical={ isMediumScreen ? undefined : true }/>
           </StackItem>
           <StackItem grow>
             <BusinessInfoForm
@@ -230,28 +225,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
             />
           </StackItem>
         </Stack>
-      }
-      {
-        layoutState === "single" &&
-        <SplitPaneLayout 
-          form1={
-            <UserInfoForm
-              layout={layoutState}
-              formData={formData}
-              formSetting={formSetting}
-              setFormData={handleInputChange}
-            />
-          }
-          form2={
-            <BusinessInfoForm
-              layout={layoutState}
-              formData={formData}
-              formSetting={formSetting}
-              setFormData={handleInputChange}
-            />
-          }
-        />
-      }
+      </StackItem>
       { 
         formSetting.mode === "new" &&
         <LoadingButton

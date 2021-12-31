@@ -24,7 +24,6 @@ import { useMediaQuery } from "react-responsive";
 import ApprovalItem from "./ApprovalItem";
 
 
-
 interface IComponentProps {
   mainPageView: mainPageView;
   setMainPageState: React.Dispatch<React.SetStateAction<mainPageView>>;
@@ -82,6 +81,13 @@ const navItems: INavLinkGroup[] = [
   }
 ];
 
+// styles
+const classes = mergeStyleSets({
+  navButton : {
+    width: "100%",
+  }
+});
+
 export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProps): JSX.Element => {
   
   // state
@@ -93,6 +99,8 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
   const { email, isUserApproverOne }: IUserData = useUserData();
   // notify
   const notify = useNotification();
+  // responsive
+  const isWideScreen = useMediaQuery({ minWidth: 688});
 
   // effect to fecth data
   React.useEffect(() => {
@@ -114,7 +122,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
       query
         .then(result => {
           // approver string
-          const approver = mainPageView === "approval1" ? "Approver1" : "Approver2" // approver2 etc.. empty for now
+          const approver = mainPageView === "approval1" ? "Approver1" : "Approver2"; // approver2 etc.. empty for now
           // arrays
           const _pending: ISharepointFullFormData[] = [];
           const _approved: ISharepointFullFormData[] = [];
@@ -124,9 +132,9 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
             if (item[`${approver}Status` as keysOfSharepointData] === "Pending") {
               _pending.push(item);
             } else if (item[`${approver}Status` as keysOfSharepointData] === "Approved") {
-              _approved.push(item)
+              _approved.push(item);
             } else if (item[`${approver}Status` as keysOfSharepointData] === "Rejected") {
-              _rejected.push(item)
+              _rejected.push(item);
             }
           });
           // set
@@ -194,7 +202,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
     if (typeof newValue !== "undefined") {
       setFilterText(newValue);
     }
-  }
+  };
 
   // for nav
   const _onLinkClick = (ev?: React.MouseEvent<HTMLElement>, item?: INavLink) =>  {
@@ -204,14 +212,55 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
     }
   };
 
+  const menuProps: IContextualMenuProps = {
+    items: [
+      {
+        key: 'all',
+        text: 'All',
+        iconProps: { iconName: 'NewTeamProject' },
+        onClick: () => setViewPage("full")
+      },
+      {
+        key: 'pending',
+        text: 'Pending',
+        iconProps: { iconName: 'View' },
+        onClick: () => setViewPage("pending")
+      },
+      {
+        key: 'approved',
+        text: 'Approved',
+        iconProps: { iconName: 'View' },
+        onClick: () => setViewPage("approved")
+      },
+      {
+        key: 'rejected',
+        text: 'Rejected',
+        iconProps: { iconName: 'View' },
+        onClick: () => setViewPage("rejected")
+      }
+    ],
+  };
+
   return(
-    <Stack horizontal tokens={{ childrenGap : 8}}>
+    <Stack 
+      horizontal={ isWideScreen ? true : undefined}
+      tokens={{ childrenGap : 8}}
+    >
       <StackItem>
-        <Nav 
-          groups={navItems}
-          selectedKey={viewPage}
-          onLinkClick={(ev, item) => _onLinkClick(ev, item)}
-        />
+        {
+          isWideScreen ?
+          <Nav 
+            groups={navItems}
+            selectedKey={viewPage}
+            onLinkClick={(ev, item) => _onLinkClick(ev, item)}
+          /> :
+          <DefaultButton
+            text={viewPage}
+            iconProps={{iconName: "CollapseMenu"}}
+            menuProps={menuProps}
+            className={classes.navButton}
+          />
+        }
       </StackItem>
       <StackItem grow>
         <Stack tokens={{ childrenGap: 6}}>

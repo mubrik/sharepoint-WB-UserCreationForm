@@ -32,7 +32,7 @@ class Server implements IServer{
     return new Promise((resolve, reject) => {
       this.adCreateList.items.get()
       .then(res => resolve(res))
-      .catch(err => reject(err))
+      .catch(err => reject(err));
     });
   }
 
@@ -101,7 +101,7 @@ class Server implements IServer{
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error("error")
+      throw new Error("error");
     }
 
   }
@@ -130,7 +130,7 @@ class Server implements IServer{
       .catch(error => {
         // just resolve false for now
         reject(error);
-      })
+      });
     });
   }
   
@@ -150,7 +150,7 @@ class Server implements IServer{
       .catch(error => {
         // just resolve false for now
         resolve(false);
-      })
+      });
     });
   }
 

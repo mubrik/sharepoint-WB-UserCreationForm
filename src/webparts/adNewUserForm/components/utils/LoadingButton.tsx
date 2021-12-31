@@ -24,5 +24,5 @@ export default ({loading, loadingMsg, ...rest}: IComponentProps): JSX.Element =>
         {...rest}
       />
     </Stack>
-  )
+  );
 };

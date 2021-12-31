@@ -14,7 +14,7 @@ export default ( param: IFullFormData ): [boolean, boolean, string] => {
   const excludeProps = ["initials", "staffReplaced", "dangoteEmail"];
 
   // loop props to check empty
-  // big if statement, checking obj using every method, 
+  // big if statement, checking obj using array prototype every method, 
   // returns true if no empty value
   if (
     // wrapped to use boolean
@@ -26,10 +26,13 @@ export default ( param: IFullFormData ): [boolean, boolean, string] => {
       }
       // value empty return false to stop loop, set variables
       if (value === "") {
-        errorMsg = `The field: ${key.toUpperCase()} cannot be empty`;
+        errorMsg = `The field: ${key} cannot be empty`;
         isError = true;
         return false;
       }
+
+      // check for smileys? unicode?
+      
       // default
       return true;
     }))

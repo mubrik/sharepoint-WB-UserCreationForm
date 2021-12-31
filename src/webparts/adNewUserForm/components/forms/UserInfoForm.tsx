@@ -58,14 +58,14 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
   }
   // equal, fucntion doesnt change? not checking, memory reference value might change but doesnt matter?
   return true;
-}
+};
 
 export default React.memo(
   ({formData, setFormData, layout, formSetting}: IComponentProps): JSX.Element => {
     // for alignment
     const horizAlign = layout === "single" ? "center" : undefined;
     // responsive
-    const isWideScreen = useMediaQuery({ minWidth: 768});
+    const isWideScreen = useMediaQuery({ minWidth: 688});
 
     console.log("render userinfo");
   
@@ -77,213 +77,133 @@ export default React.memo(
           </Label>
         </StackItem>
         <Stack tokens={{ childrenGap : 8}} >
-          {
-            layout === "double" &&
-            <>
-              <Stack horizontal horizontalAlign={horizAlign} tokens={{childrenGap:8}} verticalAlign="end">
-                <StackItem grow={1}>
-                  <Dropdown
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    disabled={formSetting.mode === "readOnly" ? true : undefined}
-                    label={"Title"}
-                    selectedKey={formData.title}
-                    options={titleDropdownOpts}
-                    onChange={(_, newValue) => {setFormData("title", newValue?.text)}}
-                  />
-                </StackItem>
-                <StackItem grow={3}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="First Name"
-                    value={formData.firstName}
-                    onChange={(_, newValue) => {setFormData("firstName", newValue as string)}}
-                  />
-                </StackItem>
-                <StackItem grow={3}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Last Name"
-                    value={formData.lastName}
-                    onChange={(_, newValue) => {setFormData("lastName", newValue as string)}}
-                  />
-                </StackItem>
-              </Stack>
-              <Stack horizontal horizontalAlign={horizAlign} tokens={{childrenGap:8}}>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Mobile Number"
-                    value={formData.mobileNumber}
-                    onChange={(_, newValue) => {setFormData("mobileNumber", newValue as string)}}
-                    type="tel"
-                  />
-                </StackItem>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    prefix="Private Number"
-                    value={formData.privateNumber}
-                    onChange={(_, newValue) => {setFormData("privateNumber", newValue as string)}}
-                    type="tel"
-                  />
-                </StackItem>
-              </Stack>
-              <Stack horizontal horizontalAlign={horizAlign} tokens={{childrenGap:8}}>
-                <StackItem grow={1}>
-                  <ResponsiveTextField 
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    prefix="Initials"
-                    value={formData.initials}
-                    onChange={(_, newValue) => {setFormData("initials", newValue as string)}}
-                  />
-                </StackItem>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Private Email"
-                    value={formData.privateEmail}
-                    onChange={(_, newValue) => {setFormData("privateEmail", newValue as string)}}
-                    onGetErrorMessage={(value) => {
-                      return value.includes("@") ? "" : "Error, Not an email"
-                    }}
-                    validateOnLoad={false}
-                    validateOnFocusOut
-                    type="email"
-                  />
-                </StackItem>
-              </Stack>
-              <Stack horizontal horizontalAlign={horizAlign} tokens={{childrenGap:8}}>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="City"
-                    value={formData.city}
-                    onChange={(_, newValue) => {setFormData("city", newValue as string)}}
-                  />
-                </StackItem>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Country"
-                    value={formData.country}
-                    onChange={(_, newValue) => {setFormData("country", newValue as string)}}
-                  />
-                </StackItem>
-              </Stack>
-            </>
-          }
-          {
-            layout === "single" &&
-            <>
-              <Stack horizontal={ isWideScreen ? true : undefined } tokens={{ childrenGap: 10 }} wrap>
-                <StackItem grow={1}>
-                  <Dropdown
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    disabled={formSetting.mode === "readOnly" ? true : undefined}
-                    label={"Title"}
-                    selectedKey={formData.title}
-                    options={titleDropdownOpts}
-                    onChange={(_, newValue) => {setFormData("title", newValue?.text)}}
-                  />
-                </StackItem>
-                <StackItem grow={2}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="First Name"
-                    value={formData.firstName}
-                    onChange={(_, newValue) => {setFormData("firstName", newValue as string)}}
-                  />
-                </StackItem>
-                <StackItem grow={2}>
+          <StackItem grow>
+            <Stack
+              tokens={{ childrenGap : 8}}
+              horizontal={isWideScreen ? true : undefined}
+            >
+              <StackItem shrink align="start">
+                <Dropdown
+                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  disabled={formSetting.mode === "readOnly" ? true : undefined}
+                  label={"Title"}
+                  selectedKey={formData.title}
+                  options={titleDropdownOpts}
+                  onChange={(_, newValue) => setFormData("title", newValue?.text)}
+                />
+              </StackItem>
+              <StackItem grow={2}>
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  prefix="First Name"
+                  value={formData.firstName}
+                  onChange={(_, newValue) => setFormData("firstName", newValue as string)}
+                />
+              </StackItem>
+              <StackItem grow={3}>
                   <ResponsiveTextField
                     readOnly={formSetting.mode === "readOnly" ? true : undefined}
                     required={formSetting.mode === "readOnly" ? undefined : true}
                     prefix="Last Name"
                     value={formData.lastName}
-                    onChange={(_, newValue) => {setFormData("lastName", newValue as string)}}
+                    onChange={(_, newValue) => setFormData("lastName", newValue as string)}
                   />
-                </StackItem>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Mobile Number"
-                    value={formData.mobileNumber}
-                    onChange={(_, newValue) => {setFormData("mobileNumber", newValue as string)}}
-                    type="tel"
-                  />
-                </StackItem>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    prefix="Private Number"
-                    value={formData.privateNumber}
-                    onChange={(_, newValue) => {setFormData("privateNumber", newValue as string)}}
-                    type="tel"
-                  />
-                </StackItem>              
-              </Stack>
-              <Stack horizontal={ isWideScreen ? true : undefined } tokens={{ childrenGap: 10 }} wrap>
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    prefix="Initials"
-                    value={formData.initials}
-                    onChange={(_, newValue) => {setFormData("initials", newValue as string)}}
-                  />
-                </StackItem>   
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Private Email"
-                    value={formData.privateEmail}
-                    onChange={(_, newValue) => {setFormData("privateEmail", newValue as string)}}
-                    onGetErrorMessage={(value) => {
-                      return value.includes("@") ? "" : "Error, Not an email"
-                    }}
-                    validateOnLoad={false}
-                    validateOnFocusOut
-                    type="email"
-                  />
-                </StackItem>   
-                <StackItem grow={2}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="City"
-                    value={formData.city}
-                    onChange={(_, newValue) => {setFormData("city", newValue as string)}}
-                  />
-                </StackItem>
-                <StackItem grow={2}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
-                    prefix="Country"
-                    value={formData.country}
-                    onChange={(_, newValue) => {setFormData("country", newValue as string)}}
-                  />
-                </StackItem>
-              </Stack>
-            </>
-          }
-          <ResponsiveTextField
-            multiline
-            autoAdjustHeight
-            readOnly={formSetting.mode === "readOnly" ? true : undefined}
-            required={formSetting.mode === "readOnly" ? undefined : true}
-            prefix="Address"
-            value={formData.address}
-            onChange={(_, newValue) => {setFormData("address", newValue as string)}}
-          />
+              </StackItem>
+            </Stack>
+          </StackItem>
+          <StackItem grow>
+            <Stack 
+              tokens={{ childrenGap : 8}}
+              horizontal={isWideScreen ? true : undefined}
+            >
+              <StackItem grow={1}>
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  prefix="Mobile Number"
+                  value={formData.mobileNumber}
+                  onChange={(_, newValue) => setFormData("mobileNumber", newValue as string)}
+                  type="tel"
+                />
+              </StackItem>
+              <StackItem grow={1}>
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  prefix="Private Number"
+                  value={formData.privateNumber}
+                  onChange={(_, newValue) => setFormData("privateNumber", newValue as string)}
+                  type="tel"
+                />
+              </StackItem>
+            </Stack>
+          </StackItem>
+          <StackItem grow>
+            <Stack 
+              tokens={{ childrenGap : 8}}
+              horizontal={isWideScreen ? true : undefined}
+            >
+              <StackItem grow={1}>
+                <ResponsiveTextField 
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  prefix="Initials"
+                  value={formData.initials}
+                  onChange={(_, newValue) => setFormData("initials", newValue as string)}
+                />
+              </StackItem>
+              <StackItem grow={1}>
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  prefix="Private Email"
+                  value={formData.privateEmail}
+                  onChange={(_, newValue) => setFormData("privateEmail", newValue as string)}
+                  onGetErrorMessage={(value) => {
+                    return value.includes("@") ? "" : "Error, Not an email"
+                  }}
+                  validateOnLoad={false}
+                  validateOnFocusOut
+                  type="email"
+                />
+              </StackItem>
+            </Stack>
+          </StackItem>
+          <StackItem grow>
+            <Stack 
+              tokens={{ childrenGap : 8}}
+              horizontal={isWideScreen ? true : undefined}
+            >
+              <StackItem grow={1}>
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  prefix="City"
+                  value={formData.city}
+                  onChange={(_, newValue) => setFormData("city", newValue as string)}
+                />
+              </StackItem>
+              <StackItem grow={1}>
+                <ResponsiveTextField
+                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  prefix="Country"
+                  value={formData.country}
+                  onChange={(_, newValue) => setFormData("country", newValue as string)}
+                />
+              </StackItem>
+            </Stack>
+          </StackItem>
+          <StackItem grow>
+            <ResponsiveTextField
+              multiline
+              autoAdjustHeight
+              readOnly={formSetting.mode === "readOnly" ? true : undefined}
+              required={formSetting.mode === "readOnly" ? undefined : true}
+              prefix="Address"
+              value={formData.address}
+              onChange={(_, newValue) => setFormData("address", newValue as string)}
+            />
+          </StackItem>
         </Stack>
       </Stack>
     );

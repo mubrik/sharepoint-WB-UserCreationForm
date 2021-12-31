@@ -11,12 +11,12 @@ interface IComponentProps {
   form2: React.ReactNode;
 }
 
-type viewState = "form1" | "form2";
+type viewStateType = "form1" | "form2";
 
 export default ({ form1, form2 }:IComponentProps): JSX.Element => {
 
   // pane view state
-  const [viewState, setViewState] = React.useState<viewState>("form1");
+  const [viewState, setViewState] = React.useState<viewStateType>("form1");
   
   return(
     <Stack tokens={{childrenGap : 8}}>

@@ -10,7 +10,7 @@ import { useNotification } from "../notification/NotificationBarContext";
 import createContext from "../utils/createContext";
 
 // context
-const [useUserData, UserProvider] = createContext<IUserData>()
+const [useUserData, UserProvider] = createContext<IUserData>();
 
 interface IComponentProps {
   children: React.ReactNode;

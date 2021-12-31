@@ -24,12 +24,12 @@ export default ({ formData, setFormData }:IComponentProps): JSX.Element => {
   const handleChange = (people: IPersonaProps[]) => {
     // if empty, none
     if (people.length === 0) {
-      setFormData("supervisorEmail", "")
+      setFormData("supervisorEmail", "");
     } else {
       const person = people[0];
       setFormData("supervisorEmail", person.secondaryText);
     }
-  }
+  };
 
   return(
     <PeoplePicker
@@ -43,5 +43,5 @@ export default ({ formData, setFormData }:IComponentProps): JSX.Element => {
       principalTypes={[PrincipalType.User]}
       resolveDelay={1000}
     />
-  )
+  );
 };

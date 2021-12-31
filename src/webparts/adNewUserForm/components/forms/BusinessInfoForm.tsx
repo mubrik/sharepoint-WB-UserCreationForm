@@ -53,13 +53,13 @@ for (let i = 0; i < 20; i++) {
   const grade = {
     key: `Grade ${i+1}`,
     text: `Grade ${i+1}`
-  }
+  };
   salaryGradeDropdownOpts.push((grade));
   // push to step
   const step = {
     key: `Step ${i+1}`,
     text: `Step ${i+1}`
-  }
+  };
   salaryStepDropdownOpts.push((step));
 }
 
@@ -89,7 +89,7 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
   }
   // equal, fucntion doesnt change? not checking, memory reference value might change but doesnt matter?
   return true;
-}
+};
 
 interface IComponentProps {
   formData: IFullFormData;
@@ -104,7 +104,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
   // for alignment
   const horizAlign = layout === "single" ? "center" : undefined;
   // responsive
-  const isWideScreen = useMediaQuery({ minWidth: 768});
+  const isWideScreen = useMediaQuery({ minWidth: 688});
   console.log("render bisinfo");
 
   return(
@@ -115,235 +115,144 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
         </Label>
       </StackItem>
       <Stack tokens={{ childrenGap: 8 }}>
-        {
-          layout === "double" &&
-          <>
-            <Stack horizontal tokens={{ childrenGap: 8 }} verticalAlign={"end"}  horizontalAlign={horizAlign} >
-              <StackItem grow={1}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined}
-                  label="Business Justification"
-                  selectedKey={formData.businessJustification}
-                  options={businessJustificationOpts}
-                  onChange={(_, newValue) => {setFormData("businessJustification", newValue?.text)}}
-                />
-              </StackItem>
-              {
-                formData.businessJustification === "Job Replacement" &&
-                <StackItem grow={1}>
-                  <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    prefix="Staff Being Replaced"
-                    value={formData.staffReplaced}
-                    onChange={ formSetting.mode === "readOnly" ? 
-                      (_, newValue) => {setFormData("staffReplaced", newValue as string)}
-                      : undefined
-                    }
-                  />
-                </StackItem>
-              }
+        <StackItem grow>
+          <Dropdown
+            disabled={formSetting.mode === "readOnly" ? true : undefined}
+            label="Business Justification"
+            selectedKey={formData.businessJustification}
+            options={businessJustificationOpts}
+            onChange={(_, newValue) => setFormData("businessJustification", newValue?.text)}
+          />
+        </StackItem>
+        <StackItem grow>
+          <PeoplePickerComp 
+            formData={formData}
+            setFormData={setFormData}
+          />
+        </StackItem>
+        <StackItem grow>
+          <Stack
+            tokens={{ childrenGap : 8}}
+            horizontal={isWideScreen ? true : undefined}
+          >
+            {
+              formData.businessJustification === "Job Replacement" &&
               <StackItem grow={1}>
                 <ResponsiveTextField
                   readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Job Title"
-                  value={formData.jobTitle}
-                  onChange={(_, newValue) => {setFormData("jobTitle", newValue as string)}}
+                  prefix="Staff Being Replaced"
+                  value={formData.staffReplaced}
+                  onChange={ formSetting.mode === "readOnly" ? 
+                    undefined
+                    : (_, newValue) => setFormData("staffReplaced", newValue as string)
+                  }
                 />
               </StackItem>
-            </Stack>
-            <Stack horizontal tokens={{childrenGap:8}}  horizontalAlign={horizAlign}>
-              <StackItem grow={1}>
+            }
+            <StackItem grow>
+              <ResponsiveTextField
+                readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                prefix="Job Title"
+                value={formData.jobTitle}
+                onChange={(_, newValue) => setFormData("jobTitle", newValue as string)}
+              />
+            </StackItem>
+          </Stack>
+        </StackItem>
+        <StackItem grow>
+          <Stack
+            tokens={{ childrenGap : 8}}
+            horizontal={isWideScreen ? true : undefined}
+          >
+            <StackItem grow>
+              <ResponsiveTextField
+                readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                prefix="Department"
+                value={formData.department}
+                onChange={(_, newValue) => setFormData("department", newValue as string)}
+              />
+            </StackItem>
+            <StackItem grow>
+              <ResponsiveTextField
+                readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                prefix="Dangote Email"
+                value={formData.dangoteEmail}
+                onChange={(_, newValue) => setFormData("dangoteEmail", newValue as string)}
+                onGetErrorMessage={(value) => {
+                  return value.includes("@") ? "" : "Error, Not an email"
+                }}
+                validateOnLoad={false}
+                validateOnFocusOut
+                type="email"
+              />
+            </StackItem>
+          </Stack>
+        </StackItem>
+        <StackItem grow>
+          <Stack
+            tokens={{ childrenGap : 8}}
+            horizontal={isWideScreen ? true : undefined}
+          >
+            <StackItem grow>
+              <Dropdown
+                disabled={formSetting.mode === "readOnly" ? true : undefined}
+                label="Salary Grade"
+                selectedKey={formData.salaryLevel}
+                options={salaryGradeDropdownOpts}
+                onChange={(_, newValue) => setFormData("salaryLevel", newValue?.text)}
+              />
+            </StackItem>
+            <StackItem grow>
+              <Dropdown
+                disabled={formSetting.mode === "readOnly" ? true : undefined}
+                label="Salary Step"
+                selectedKey={formData.salaryStep}
+                options={salaryStepDropdownOpts}
+                onChange={(_, newValue) => setFormData("salaryStep", newValue?.text)}
+              />
+            </StackItem>
+          </Stack>
+        </StackItem>
+        <StackItem grow>
+          <Stack
+            wrap
+            tokens={{ childrenGap : 8}}
+            horizontal={isWideScreen ? true : undefined}
+          >
+            <Stack
+              grow
+              tokens={{ childrenGap : 8}}
+            >
+              <StackItem grow>
                 <Dropdown
                   disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label="SBU"
                   selectedKey={formData.office}
                   options={sbuOpts}
-                  onChange={(_, newValue) => {setFormData("office", newValue?.text)}}
+                  onChange={(_, newValue) => setFormData("office", newValue?.text)}
                 />
               </StackItem>
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Department"
-                  value={formData.department}
-                  onChange={(_, newValue) => {setFormData("department", newValue as string)}}
-                />
-              </StackItem>
-            </Stack>
-            <Stack horizontal tokens={{childrenGap:8}} horizontalAlign={horizAlign}>
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Dangote Email"
-                  value={formData.dangoteEmail}
-                  onChange={(_, newValue) => {setFormData("dangoteEmail", newValue as string)}}
-                  onGetErrorMessage={(value) => {
-                    return value.includes("@") ? "" : "Error, Not an email"
-                  }}
-                  validateOnLoad={false}
-                  validateOnFocusOut
-                  type="email"
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <PeoplePickerComp 
-                  formData={formData}
-                  setFormData={setFormData}
-                />
-              </StackItem>
-            </Stack>
-            <Stack horizontal tokens={{childrenGap:8}} horizontalAlign={horizAlign}>
-              <StackItem grow={1}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined}
-                  label="Salary Grade"
-                  selectedKey={formData.salaryLevel}
-                  options={salaryGradeDropdownOpts}
-                  onChange={(_, newValue) => {setFormData("salaryLevel", newValue?.text)}}
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined}
-                  label="Salary Step"
-                  selectedKey={formData.salaryStep}
-                  options={salaryStepDropdownOpts}
-                  onChange={(_, newValue) => {setFormData("salaryStep", newValue?.text)}}
-                />
-              </StackItem>
-              <StackItem grow={1} shrink>
+              <StackItem grow>
                 <ResponsiveTextField
                   readOnly={formSetting.mode === "readOnly" ? true : undefined}
                   prefix="Direct Reports"
                   value={formData.directReports}
-                  onChange={(_, newValue) => {setFormData("directReports", newValue as string)}}
+                  onChange={(_, newValue) => setFormData("directReports", newValue as string)}
                   type="number"
                   min={0}
                   max={10}
                 />
               </StackItem>
             </Stack>
-            <Stack horizontal tokens={{childrenGap:8}} >
+            <StackItem grow>
               <CustomMultiCheckBox
-                formData={formData}
+                dataString={formData.hardware}
                 setFormData={setFormData}
                 disabled={formSetting.mode === "readOnly" ? true : undefined}
               />
-            </Stack>
-          </>
-        }
-        {
-          layout === "single" &&
-          <>
-            <Stack horizontal={isWideScreen ? true : undefined} wrap tokens={{ childrenGap: 8 }} verticalAlign={"end"}>
-              <StackItem grow={1}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
-                  label="Business Justification"
-                  selectedKey={formData.businessJustification}
-                  options={businessJustificationOpts}
-                  onChange={(_, newValue) => {setFormData("businessJustification", newValue?.text)}}
-                />
-              </StackItem>
-                {
-                  formData.businessJustification === "Job Replacement" &&
-                  <StackItem grow={1}>
-                    <ResponsiveTextField
-                      readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                      prefix="Staff Replaced"
-                      value={formData.staffReplaced}
-                      onChange={(_, newValue) => {setFormData("staffReplaced", newValue as string)}}
-                    />
-                  </StackItem>
-                }
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Job Title"
-                  value={formData.jobTitle}
-                  onChange={(_, newValue) => {setFormData("jobTitle", newValue as string)}}
-                />
-              </StackItem>
-            </Stack>
-            <Stack horizontal={isWideScreen ? true : undefined} wrap tokens={{ childrenGap: 8 }}>
-              <StackItem grow={2}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
-                  label="SBU"
-                  selectedKey={formData.office}
-                  options={sbuOpts}
-                  onChange={(_, newValue) => {setFormData("office", newValue?.text)}}
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Department"
-                  value={formData.department}
-                  onChange={(_, newValue) => {setFormData("department", newValue as string)}}
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Dangote Email"
-                  value={formData.dangoteEmail}
-                  onChange={(_, newValue) => {setFormData("dangoteEmail", newValue as string)}}
-                  onGetErrorMessage={(value) => {
-                    return value.includes("@") ? "" : "Error, Not an email"
-                  }}
-                  validateOnLoad={false}
-                  validateOnFocusOut
-                  type="email"
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  prefix="Direct Reports"
-                  value={formData.directReports}
-                  onChange={(_, newValue) => {setFormData("directReports", newValue as string)}}
-                  type="number"
-                  min={0}
-                  max={10}
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <PeoplePickerComp 
-                  formData={formData}
-                  setFormData={setFormData}
-                />
-              </StackItem>
-            </Stack>
-            <Stack horizontal={isWideScreen ? true : undefined} wrap tokens={{ childrenGap: 8 }}>
-              <StackItem grow={1}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
-                  label="Salary Grade"
-                  selectedKey={formData.salaryLevel}
-                  options={salaryGradeDropdownOpts}
-                  onChange={(_, newValue) => {setFormData("salaryLevel", newValue?.text)}}
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined} 
-                  label="Salary Step"
-                  selectedKey={formData.salaryStep}
-                  options={salaryStepDropdownOpts}
-                  onChange={(_, newValue) => {setFormData("salaryStep", newValue?.text)}}
-                />
-              </StackItem>
-              <StackItem grow={1}>
-                <CustomMultiCheckBox
-                  disabled={formSetting.mode === "readOnly" ? true : undefined}
-                  formData={formData}
-                  setFormData={setFormData}
-                />
-              </StackItem>
-            </Stack>
-          </> 
-        }
+            </StackItem>
+          </Stack>
+        </StackItem>
       </Stack>
     </Stack>
   );
