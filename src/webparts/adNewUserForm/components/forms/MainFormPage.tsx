@@ -3,7 +3,7 @@ import * as React from "react";
 import {
   Stack, Separator,
   StackItem, Label,
-  IconButton, mergeStyles
+  Dialog, mergeStyles
 } from "office-ui-fabric-react";
 // data
 import { IFullFormData, keysOfFullFormData,
@@ -23,6 +23,9 @@ import { useMediaQuery } from "react-responsive";
 import { useNotification } from "../notification/NotificationBarContext";
 // server
 import fetchServer from "../../controller/server";
+// hook
+import useAddressQuery from "../utils/useAddressQuery";
+import { useDialog } from "../dialog/DialogContext";
 
 // initial form data
 const initialMainFormData: IFullFormData  = {
@@ -37,7 +40,8 @@ const initialMainFormData: IFullFormData  = {
   city: "",
   country: "",
   jobTitle: "",
-  office: "DCP-Ibese",
+  comment: "",
+  sbu: "",
   department: "",
   supervisorEmail: "",
   dangoteEmail: "",
@@ -66,6 +70,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
 
   // layout state
   const [layoutState, setLayoutState] = React.useState<paneLayoutState>("double");
+  const [showQueryDialog, setShowQueryDialog] = React.useState(false);
   const [formIsValid, setFormIsValid] = React.useState(false);
   const [formIsLoading, setFormIsLoading] = React.useState(false);
   const [formIsTouched, setFormIsTouched] = React.useState(false);
@@ -78,7 +83,16 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   // notify
   const notify = useNotification();
   // user
-  const { displayName } = useUserData();
+  const { displayName, email } = useUserData();
+  // url address query
+  const addressQuery = useAddressQuery();
+  // show dialog
+  const setDialog = useDialog();
+
+  // testing
+  React.useEffect(() => {
+    fetchServer.testing();
+  }, []);
 
   // effect for validation notification
   React.useEffect(() => {
@@ -98,7 +112,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
 
   // effect for fetching
   React.useEffect(() => {
-    if (formSetting.mode === "readOnly") {
+    if (formSetting.mode === "readOnly" || formSetting.mode === "approval") {
       // fetch data
       if (formSetting.id) {
         fetchServer.getListItemById(formSetting.id)
@@ -110,6 +124,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
             firstName: result.FirstName,
             lastName: result.LastName,
             initials: result.Initials ? result.Initials : "",
+            comment: result.Comment ? result.Comment: "",
             privateEmail: result.PrivateEmail,
             privateNumber: result.PrivateNumber,
             mobileNumber: result.MobileNumber,
@@ -117,7 +132,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
             city: result.City,
             country: result.Country,
             jobTitle: result.JobTitle,
-            office: result.Office,
+            sbu: result.Office,
             department: result.Department,
             supervisorEmail: result.SupervisorEmail,
             dangoteEmail: result.DangoteEmail,
@@ -142,7 +157,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   // effect to run on unmount
   React.useEffect(() => {
     // set form mode back to new
-    if (formSetting.mode === "readOnly" && formData.id){
+    if (formSetting.mode !== "new" && formData.id){
       return () => setFormSetting({
         mode: "new"
       });
@@ -152,14 +167,31 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   // handler for all sub comp, TS hack? but i think i know what i'm doing lol
   // memoised cause will be passed down 
   const handleInputChange = React.useCallback(
-    <T extends keysOfFullFormData, A>( key:T, value: A) => {
+    <T extends keysOfFullFormData, A>( field:T, value: A) => {
       // set touched
       setFormIsTouched(true);
+      // some light editing
+      if (field.toLowerCase().includes("name")) {
+        // mutate value to remove spaces
+        if (typeof value === "string") {
+
+          setFormData(prevValue => {
+            return {
+              ...prevValue,
+              [field]: value.trim()
+            };
+          });
+
+          console.log(value);
+          return;
+        }
+      }
+
       // set form data
       setFormData(prevValue => {
         return {
           ...prevValue,
-          [key]: value
+          [field]: value
         };
       });
     }, []
@@ -170,7 +202,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     // loading
     setFormIsLoading(true);
     // request
-    fetchServer.createRequest(formData)
+    fetchServer.createRequest(formData, email)
     .then(() => {
       notify({show: true, msg: "Request Created", errorObj: null});
       // reset form, un comment when not testing
@@ -179,18 +211,42 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     })
     .catch(error => {
       if (error instanceof Error) {
-        notify({show: true, msg: "Error Creating Item", errorObj: error, isError: true, type: "error"});
+        notify({show: true,
+          msg: error.message ? error.message :  "Error Creating Item", 
+          errorObj: error, 
+          isError: true, 
+          type: "error"
+        });
       }
     })
     .finally(() => setFormIsLoading(false));
   };
-  // memo just for flex
-  const iconProps = React.useMemo(() => {
-    return {
-      iconName: layoutState === "double" ? "OpenPane" : "ClosePane",
-      title: layoutState === "double" ? "OpenPane" : "ClosePane",
-    };
-  }, [layoutState]);
+
+  // handle load query
+  const handleSetQuery = (): void => {
+
+    if (addressQuery) {
+      const [id, other] = addressQuery;
+      setFormSetting({
+        id: Number(id),
+        mode: "approval"
+      });
+      // change url to remove query
+      window.history.replaceState(null, "", window.location.href.split("?")[0]);
+    }
+  };
+
+  if (addressQuery && formSetting.mode === "new") {
+    setDialog({
+      show: true,
+      msg: "Load query data?",
+      onAccept: handleSetQuery,
+      onClose: () => {
+        // change url to remove query
+        window.history.replaceState(null, "", window.location.href.split("?")[0]);
+      }
+    });
+  }
  
 
   return(

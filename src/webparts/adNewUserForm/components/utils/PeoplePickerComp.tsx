@@ -13,9 +13,10 @@ import { useMediaQuery } from "react-responsive";
 interface IComponentProps {
   formData: IFullFormData;
   setFormData: <T extends keyof IFullFormData, A>(key: T, value: A) => void;
+  disabled: boolean | undefined;
 }
 
-export default ({ formData, setFormData }:IComponentProps): JSX.Element => {
+export default ({ formData, setFormData, disabled }:IComponentProps): JSX.Element => {
 
   const webpartData = React.useContext(WebpartContext);
   // responsive
@@ -35,6 +36,7 @@ export default ({ formData, setFormData }:IComponentProps): JSX.Element => {
     <PeoplePicker
       context={webpartData?.context as any} // casting as any cause the types dont match but it works
       defaultSelectedUsers={formData.supervisorEmail === "" ? undefined : [formData.supervisorEmail]}
+      disabled={disabled ? disabled : false}
       titleText={"Supervisor"}
       personSelectionLimit={1}
       required={true}

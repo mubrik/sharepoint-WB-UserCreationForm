@@ -15,6 +15,11 @@ import ResponsiveTextField from "../utils/ResponsiveTextField";
 import { useMediaQuery } from "react-responsive";
 // utils
 import { pick } from "lodash";
+// validators 
+import {
+  numberFieldValidator, emailFieldValidator,
+  textFieldValidator
+} from "../validator/validator";
 
 interface IComponentProps {
   formData: IFullFormData;
@@ -41,7 +46,8 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
     "title", "firstName",
     "lastName", "mobileNumber",
     "privateEmail", "privateNumber",
-    "initials", "address", "city", "country"
+    "initials", "address", "city", "country",
+    "comment"
   ];
   // filter
   const prev = pick(prevProps.formData, userFormArr);
@@ -66,6 +72,10 @@ export default React.memo(
     const horizAlign = layout === "single" ? "center" : undefined;
     // responsive
     const isWideScreen = useMediaQuery({ minWidth: 688});
+    // readonly
+    const _readOnly = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? true : undefined;
+    const _required = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? undefined : true;
+    const _disabled = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? true : undefined;
 
     console.log("render userinfo");
   
@@ -84,9 +94,9 @@ export default React.memo(
             >
               <StackItem shrink align="start">
                 <Dropdown
-                  required={formSetting.mode === "readOnly" ? undefined : true}
-                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label={"Title"}
+                  disabled={_disabled}
+                  required={_required}
                   selectedKey={formData.title}
                   options={titleDropdownOpts}
                   onChange={(_, newValue) => setFormData("title", newValue?.text)}
@@ -94,8 +104,8 @@ export default React.memo(
               </StackItem>
               <StackItem grow={2}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  readOnly={_readOnly}
+                  required={_required}
                   prefix="First Name"
                   value={formData.firstName}
                   onChange={(_, newValue) => setFormData("firstName", newValue as string)}
@@ -103,11 +113,14 @@ export default React.memo(
               </StackItem>
               <StackItem grow={3}>
                   <ResponsiveTextField
-                    readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                    required={formSetting.mode === "readOnly" ? undefined : true}
+                    readOnly={_readOnly}
+                    required={_required}
                     prefix="Last Name"
                     value={formData.lastName}
                     onChange={(_, newValue) => setFormData("lastName", newValue as string)}
+                    onGetErrorMessage={textFieldValidator}
+                    validateOnLoad={false}
+                    validateOnFocusOut
                   />
               </StackItem>
             </Stack>
@@ -119,17 +132,20 @@ export default React.memo(
             >
               <StackItem grow={1}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  readOnly={_readOnly}
+                  required={_required}
                   prefix="Mobile Number"
                   value={formData.mobileNumber}
                   onChange={(_, newValue) => setFormData("mobileNumber", newValue as string)}
+                  onGetErrorMessage={numberFieldValidator}
+                  validateOnLoad={false}
+                  validateOnFocusOut
                   type="tel"
                 />
               </StackItem>
               <StackItem grow={1}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  readOnly={_readOnly}
                   prefix="Private Number"
                   value={formData.privateNumber}
                   onChange={(_, newValue) => setFormData("privateNumber", newValue as string)}
@@ -145,7 +161,7 @@ export default React.memo(
             >
               <StackItem grow={1}>
                 <ResponsiveTextField 
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  readOnly={_readOnly}
                   prefix="Initials"
                   value={formData.initials}
                   onChange={(_, newValue) => setFormData("initials", newValue as string)}
@@ -153,14 +169,12 @@ export default React.memo(
               </StackItem>
               <StackItem grow={1}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  readOnly={_readOnly}
+                  required={_required}
                   prefix="Private Email"
                   value={formData.privateEmail}
                   onChange={(_, newValue) => setFormData("privateEmail", newValue as string)}
-                  onGetErrorMessage={(value) => {
-                    return value.includes("@") ? "" : "Error, Not an email"
-                  }}
+                  onGetErrorMessage={emailFieldValidator}
                   validateOnLoad={false}
                   validateOnFocusOut
                   type="email"
@@ -175,8 +189,8 @@ export default React.memo(
             >
               <StackItem grow={1}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  readOnly={_readOnly}
+                  required={_required}
                   prefix="City"
                   value={formData.city}
                   onChange={(_, newValue) => setFormData("city", newValue as string)}
@@ -184,8 +198,8 @@ export default React.memo(
               </StackItem>
               <StackItem grow={1}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
-                  required={formSetting.mode === "readOnly" ? undefined : true}
+                  readOnly={_readOnly}
+                  required={_required}
                   prefix="Country"
                   value={formData.country}
                   onChange={(_, newValue) => setFormData("country", newValue as string)}
@@ -197,11 +211,21 @@ export default React.memo(
             <ResponsiveTextField
               multiline
               autoAdjustHeight
-              readOnly={formSetting.mode === "readOnly" ? true : undefined}
-              required={formSetting.mode === "readOnly" ? undefined : true}
+              readOnly={_readOnly}
+              required={_required}
               prefix="Address"
               value={formData.address}
               onChange={(_, newValue) => setFormData("address", newValue as string)}
+            />
+          </StackItem>
+          <StackItem grow>
+            <ResponsiveTextField
+              multiline
+              autoAdjustHeight
+              readOnly={_readOnly}
+              prefix="Comment"
+              value={formData.comment}
+              onChange={(_, newValue) => setFormData("comment", newValue as string)}
             />
           </StackItem>
         </Stack>

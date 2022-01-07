@@ -87,6 +87,9 @@ export default ({approvalItem, handleApprovalAction, handleViewClick, index}: IC
       <Stack.Item shrink={4} grow className={classes.itemUsername}>User: {approvalItem.FirstName + approvalItem.LastName}</Stack.Item>
       <Stack.Item shrink={4} grow className={classes.itemUsername}>By: {approvalItem.creatorEmail}</Stack.Item>
       <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver1Status]}>Approver1 Status: {approvalItem.Approver1Status}</Stack.Item>
+      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver2Status]}>Approver2 Status: {approvalItem.Approver2Status}</Stack.Item>
+      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver3Status]}>Approver3 Status: {approvalItem.Approver3Status}</Stack.Item>
+      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver4Status]}>Approver4 Status: {approvalItem.Approver4Status}</Stack.Item>
       <Stack 
         horizontal
         className={classes.itemButtonContainer}

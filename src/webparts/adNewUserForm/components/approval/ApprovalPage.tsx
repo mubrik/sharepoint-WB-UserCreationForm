@@ -16,7 +16,8 @@ import {
   IUserData, mainPageView,
   ISharepointFullFormData,
   keysOfSharepointData,
-  approvalStatus, formSettings
+  approvalStatus, formSettings,
+  approvalIndex
 } from "../../types/custom";
 // query
 import { useMediaQuery } from "react-responsive";
@@ -96,7 +97,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
   const [viewPage, setViewPage] = React.useState<viewPage>("pending"); // page view filter
   const [filterText, setFilterText] = React.useState("");
   // context data
-  const { email, isUserApproverOne }: IUserData = useUserData();
+  const { email }: IUserData = useUserData();
   // notify
   const notify = useNotification();
   // responsive
@@ -106,34 +107,28 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
   React.useEffect(() => {
     if (stateData.status === "idle") {
       // var
-      let query:Promise<ISharepointFullFormData[]>;
-      // switch
-      switch (mainPageView) {
-        case "approval1": 
-          // do something
-          query = fetchServer.getApproverOneList(email as string);
-          break;
-         
-        default:
-          query = new Promise(() => []);
-          break;
-      }
-      // work on result
-      query
+      // approval page span multiple approvers
+      // each page knows the approver they are fetching/updating from userdata > nav
+      let approverTag: approvalIndex = 
+        mainPageView === "approval1" ? "Approver1"
+        : mainPageView === "approval2" ? "Approver2"
+        : mainPageView === "approval3" ? "Approver3" : "Approver4";
+
+      // get approver
+      fetchServer.getApproverList(email as string, approverTag)
         .then(result => {
           // approver string
-          const approver = mainPageView === "approval1" ? "Approver1" : "Approver2"; // approver2 etc.. empty for now
           // arrays
           const _pending: ISharepointFullFormData[] = [];
           const _approved: ISharepointFullFormData[] = [];
           const _rejected: ISharepointFullFormData[] = [];
           // loop
           result.forEach(item => {
-            if (item[`${approver}Status` as keysOfSharepointData] === "Pending") {
+            if (item[`${approverTag}Status` as keysOfSharepointData] === "Pending") {
               _pending.push(item);
-            } else if (item[`${approver}Status` as keysOfSharepointData] === "Approved") {
+            } else if (item[`${approverTag}Status` as keysOfSharepointData] === "Approved") {
               _approved.push(item);
-            } else if (item[`${approver}Status` as keysOfSharepointData] === "Rejected") {
+            } else if (item[`${approverTag}Status` as keysOfSharepointData] === "Rejected") {
               _rejected.push(item);
             }
           });

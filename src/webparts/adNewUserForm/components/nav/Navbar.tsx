@@ -26,7 +26,8 @@ export interface IComponentProps {
 export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
   
   // user
-  const { isUserApproverOne } = useUserData();
+  const { isUserApproverOne, isUserApproverTwo,
+  isUserApproverThree, isUserApproverFour } = useUserData();
   // responsive
   const medium = useMediaQuery({ maxWidth: 600 });
   // nav button menu props
@@ -79,7 +80,11 @@ export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
           selectedKey={pageState}
         >
           <PivotItem headerText="New User" itemKey="new" />
-          {isUserApproverOne && <PivotItem headerText="Approvals" itemKey="approval1" />}
+          <PivotItem headerText="Search" itemKey="search" />
+          {isUserApproverOne && <PivotItem headerText="Approval 1" itemKey="approval1" />}
+          {isUserApproverTwo && <PivotItem headerText="Approval 2" itemKey="approval2" />}
+          {isUserApproverThree && <PivotItem headerText="Approval 3" itemKey="approval3" />}
+          {isUserApproverFour && <PivotItem headerText="Approval 4" itemKey="approval4" />}
           <PivotItem headerText="About" itemKey="about" />
         </Pivot>
       }

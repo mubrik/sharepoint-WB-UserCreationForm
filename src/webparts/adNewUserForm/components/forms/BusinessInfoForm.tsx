@@ -67,7 +67,7 @@ for (let i = 0; i < 20; i++) {
 const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) => {
   // user form only cares for 
   const userFormArr: keysOfFullFormData[] = [
-    "jobTitle", "office",
+    "jobTitle", "sbu",
     "department", "supervisorEmail",
     "dangoteEmail", "directReports",
     "salaryLevel", "salaryStep", "businessJustification",
@@ -105,6 +105,11 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
   const horizAlign = layout === "single" ? "center" : undefined;
   // responsive
   const isWideScreen = useMediaQuery({ minWidth: 688});
+  // readonly
+  const _readOnly = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? true : undefined;
+  const _disabled = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? true : undefined;
+  const _required = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? undefined : true;
+
   console.log("render bisinfo");
 
   return(
@@ -117,8 +122,8 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
       <Stack tokens={{ childrenGap: 8 }}>
         <StackItem grow>
           <Dropdown
-            disabled={formSetting.mode === "readOnly" ? true : undefined}
             label="Business Justification"
+            disabled={_disabled}
             selectedKey={formData.businessJustification}
             options={businessJustificationOpts}
             onChange={(_, newValue) => setFormData("businessJustification", newValue?.text)}
@@ -128,6 +133,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
           <PeoplePickerComp 
             formData={formData}
             setFormData={setFormData}
+            disabled={_disabled}
           />
         </StackItem>
         <StackItem grow>
@@ -139,7 +145,8 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
               formData.businessJustification === "Job Replacement" &&
               <StackItem grow={1}>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  readOnly={_readOnly}
+                  required={_required}
                   prefix="Staff Being Replaced"
                   value={formData.staffReplaced}
                   onChange={ formSetting.mode === "readOnly" ? 
@@ -151,7 +158,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
             }
             <StackItem grow>
               <ResponsiveTextField
-                readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                readOnly={_readOnly}
                 prefix="Job Title"
                 value={formData.jobTitle}
                 onChange={(_, newValue) => setFormData("jobTitle", newValue as string)}
@@ -166,7 +173,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
           >
             <StackItem grow>
               <ResponsiveTextField
-                readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                readOnly={_readOnly}
                 prefix="Department"
                 value={formData.department}
                 onChange={(_, newValue) => setFormData("department", newValue as string)}
@@ -174,7 +181,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
             </StackItem>
             <StackItem grow>
               <ResponsiveTextField
-                readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                readOnly={_readOnly}
                 prefix="Dangote Email"
                 value={formData.dangoteEmail}
                 onChange={(_, newValue) => setFormData("dangoteEmail", newValue as string)}
@@ -182,7 +189,6 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
                   return value.includes("@") ? "" : "Error, Not an email"
                 }}
                 validateOnLoad={false}
-                validateOnFocusOut
                 type="email"
               />
             </StackItem>
@@ -195,7 +201,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
           >
             <StackItem grow>
               <Dropdown
-                disabled={formSetting.mode === "readOnly" ? true : undefined}
+                disabled={_disabled}
                 label="Salary Grade"
                 selectedKey={formData.salaryLevel}
                 options={salaryGradeDropdownOpts}
@@ -204,7 +210,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
             </StackItem>
             <StackItem grow>
               <Dropdown
-                disabled={formSetting.mode === "readOnly" ? true : undefined}
+                disabled={_disabled}
                 label="Salary Step"
                 selectedKey={formData.salaryStep}
                 options={salaryStepDropdownOpts}
@@ -225,16 +231,17 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
             >
               <StackItem grow>
                 <Dropdown
-                  disabled={formSetting.mode === "readOnly" ? true : undefined}
                   label="SBU"
-                  selectedKey={formData.office}
+                  disabled={_disabled}
+                  required={_required}
+                  selectedKey={formData.sbu ? formData.sbu : undefined}
                   options={sbuOpts}
-                  onChange={(_, newValue) => setFormData("office", newValue?.text)}
+                  onChange={(_, newValue) => setFormData("sbu", newValue?.text)}
                 />
               </StackItem>
               <StackItem grow>
                 <ResponsiveTextField
-                  readOnly={formSetting.mode === "readOnly" ? true : undefined}
+                  readOnly={_readOnly}
                   prefix="Direct Reports"
                   value={formData.directReports}
                   onChange={(_, newValue) => setFormData("directReports", newValue as string)}
@@ -248,7 +255,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
               <CustomMultiCheckBox
                 dataString={formData.hardware}
                 setFormData={setFormData}
-                disabled={formSetting.mode === "readOnly" ? true : undefined}
+                disabled={_disabled}
               />
             </StackItem>
           </Stack>

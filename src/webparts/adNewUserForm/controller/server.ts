@@ -13,9 +13,10 @@ import {
   IFullFormData,
   ISharepointFullFormData,
   mainPageView, ISharepointApprovalData,
-  approvalStatus
+  approvalStatus, IUserApproverData
 } from "../types/custom";
 
+type approvalIndex = "Approver1" | "Approver2"  |"Approver3" | "Approver4";
 
 
 /* handler for CRUD REST requests */
@@ -30,8 +31,16 @@ class Server implements IServer{
 
   public testing = (): Promise<any> => {
     return new Promise((resolve, reject) => {
-      this.adCreateList.items.get()
-      .then(res => resolve(res))
+      this.fetch.profiles.clientPeoplePickerSearchUser({
+        AllowEmailAddresses: true,
+        AllowMultipleEntities: false,
+        MaximumEntitySuggestions: 1,
+        QueryString: "musa.millapo"
+      })
+      .then(res => {
+        console.log(res);
+        resolve(res)
+      })
       .catch(err => reject(err));
     });
   }
@@ -84,7 +93,7 @@ class Server implements IServer{
 
       // approver status
       // vars
-      const isUserApproverOne = await this.getApproverOne(profile.Email);
+      // const isUserApproverOne = await this.getApproverOne(profile.Email);
 
 
       // return
@@ -94,7 +103,6 @@ class Server implements IServer{
         displayName: profile.DisplayName,
         manager: manager,
         jobTitle: profile.Title,
-        isUserApproverOne
       };
     } catch (error) {
       console.log(error);
@@ -115,15 +123,32 @@ class Server implements IServer{
     });
   }
 
-  public getApproverOneList = async (username:string): Promise<ISharepointFullFormData[]> => {
+  public getListFilterBySbu = async (sbu: string): Promise<ISharepointFullFormData[]> => {
+    
+    return new Promise((resolve, reject) => {
+
+      this.adCreateList.items.select()
+      .filter(`Office eq '` + sbu + "'")
+      .get()
+      .then(result => {
+        console.log(result);
+        resolve(result);
+      })
+      .catch(error => {
+        // just resolve false for now
+        reject(error);
+      });
+    });
+  }
+
+  public getApproverList = async (username:string, approverIndex: approvalIndex): Promise<ISharepointFullFormData[]> => {
     // filter by username
     return new Promise((resolve, reject) => {
       this.adCreateList.items
       .select() // filter only necessary field later
-      .filter("Approver1 eq '" + username + "'")
+      .filter(`${approverIndex} eq '` + username + "'")
       .get()
       .then(result => {
-        // if item not present, user is not an approver
         console.log(result);
         resolve(result);
       })
@@ -134,12 +159,12 @@ class Server implements IServer{
     });
   }
   
-  public getApproverOne = async (username:string): Promise<boolean> => {
+  public getApprover = async (username:string, approverIndex: approvalIndex): Promise<boolean> => {
     // filter if user email is in approver column
     return new Promise((resolve, reject) => {
       this.adCreateList.items.select()
       .top(1) // only need 1 to verify if user an approver
-      .filter("Approver1 eq '" + username + "'").get()
+      .filter(`${approverIndex} eq '` + username + "'").get()
       .then(result => {
         // if item not present, user is not an approver
         if (result.length === 0) {
@@ -154,6 +179,42 @@ class Server implements IServer{
     });
   }
 
+  public getUserApprovers = async (username: string): Promise<IUserApproverData> => {
+    // default
+    const approveObj = {
+      isUserApproverOne: false,
+      isUserApproverTwo: false,
+      isUserApproverThree: false,
+      isUserApproverFour: false,
+    }
+    // check approval, mutate obj
+    approveObj.isUserApproverOne =  await this.getApprover(username, "Approver1");
+    approveObj.isUserApproverTwo =  await this.getApprover(username, "Approver2");
+    approveObj.isUserApproverThree =  await this.getApprover(username, "Approver3");
+    approveObj.isUserApproverFour =  await this.getApprover(username, "Approver4");
+
+    return approveObj;
+  }
+
+  public doesUserExist = async (username: string): Promise<boolean> => {
+
+    return new Promise((resolve, reject) => {
+      this.fetch.profiles.clientPeoplePickerSearchUser({
+        AllowEmailAddresses: true,
+        AllowMultipleEntities: false,
+        MaximumEntitySuggestions: 1,
+        QueryString: username
+      })
+      .then(res => {
+        if (res.length === 1) {
+          resolve(true);
+        }
+        resolve(false);
+      })
+      .catch(err => reject(false));
+    });
+  }
+
   public approveRejectEntry =
     async (id: number, page: mainPageView, status: approvalStatus): Promise<boolean> => {
 
@@ -164,10 +225,18 @@ class Server implements IServer{
       const updateObj:ISharepointApprovalData = {};
       // mutate obj
       switch(page) {
-        case "approval1" :
+        case "approval1":
           updateObj["Approver1Status"] = status;
           break;
-
+        case "approval2":
+          updateObj["Approver2Status"] = status;
+          break;
+        case "approval3":
+          updateObj["Approver3Status"] = status;
+          break;
+        case "approval4":
+          updateObj["Approver4Status"] = status;
+          break;
         default:
           break;
       }
@@ -180,11 +249,22 @@ class Server implements IServer{
           reject(error);
         });
     });
-    }
+  }
 
-  public createRequest = async ( data: IFullFormData): Promise<boolean> => {
+  public createRequest = async ( data: IFullFormData, email: string|undefined): Promise<boolean> => {
+
+    const userExist = await this.doesUserExist(`${data.firstName}.${data.lastName}`);
 
     return new Promise((resolve, reject) => {
+      // undef check
+      if (email === undefined) {
+        reject(new Error("Email not available"));
+      }
+
+      if (userExist) {
+        reject(new Error(`User ${data.firstName}.${data.lastName} already exists`));
+      }
+
       // create
       this.adCreateList.items.add({
         Title: data.title,
@@ -198,7 +278,7 @@ class Server implements IServer{
         City: data.city,
         Country: data.country,
         JobTitle: data.jobTitle,
-        Office: data.office,
+        Office: data.sbu,
         Department: data.department,
         SupervisorEmail: data.supervisorEmail,
         DangoteEmail: data.dangoteEmail,
@@ -208,6 +288,7 @@ class Server implements IServer{
         BusinessJustification: data.businessJustification,
         StaffReplaced: data.staffReplaced,
         Hardware: data.hardware,
+        creatorEmail: email
       })
       .then(_ => resolve(true))
       .catch(error => {
@@ -217,7 +298,6 @@ class Server implements IServer{
       });
     });
   }
-
 
   public sendFeedback = (email: string, rating: number, feedback: string): Promise<boolean> => {
 

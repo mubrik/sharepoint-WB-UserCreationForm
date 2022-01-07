@@ -26,19 +26,42 @@ export default ({children}: IComponentProps): JSX.Element => {
   // get user data
   React.useEffect(() => {
     // server fetch
-    fetchServer.getUser()
-    .then(result => {
-      setUserData({
-        ...result
+    if (userData.id === undefined) {
+      fetchServer.getUser()
+      .then(result => {
+        setUserData({
+          ...result
+        });
+        console.log("got user");
+        return result.email;
+      })
+      .then(email => {
+        console.log("gettingt user");
+        if (email) {
+          fetchServer.getUserApprovers(email)
+          .then( (approvers) =>
+            setUserData( prevValue => ({
+              ...prevValue,
+              ...approvers
+            }))
+          );
+        }
+      })
+      .catch(error => {
+        if (error instanceof Error && "message" in error) {
+          notify({show: true, isError: true, msg: error.message, errorObj: error});
+        }
+        notify({show: true, isError: true, msg:"Error getting user, Network?", errorObj: error});
       });
-    })
-    .catch(error => {
-      if (error instanceof Error && "message" in error) {
-        notify({show: true, isError: true, msg: error.message, errorObj: error});
-      }
-      notify({show: true, isError: true, msg:"Error getting user, Network?", errorObj: error});
-    });
+    }
   }, []);
+
+  // effect for approvers, list so might take time seperate from basic user props
+  // React.useEffect(() => {
+  //   if (userData.email) {
+
+  //   }
+  // }, [userData]); 
 
   return(
     <UserProvider value={userData}>

@@ -25,6 +25,8 @@
     "lib": [
       "es5",
       "dom",
+      "DOM.Iterable",
+      "ES6",
       "es2015.collection",
       "es2015.promise",
       "ES2020"

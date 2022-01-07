@@ -11,6 +11,8 @@ import UserContext from "./userContext/UserContext";
 import AboutPage from "./about/AboutPage";
 import MainFormPage from "./forms/MainFormPage";
 import ApprovalPage from './approval/ApprovalPage';
+import SearchPage from './search/SearchPage';
+import DialogContext from './dialog/DialogContext';
 import ErrorBoundary from "./error/ErrorBoundary";
 
 // types
@@ -54,6 +56,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
   return(
     <ErrorBoundary>
     <NotificationContext>
+    <DialogContext>
     <UserContext>
     <WebpartContext.Provider value={webpartData}>
       <Stack tokens={{childrenGap : 8}}>
@@ -66,7 +69,35 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
           />
         }
         {
+          viewPage === "search" &&
+          <SearchPage />
+        }
+        {
           viewPage === "approval1" &&
+          <ApprovalPage
+            mainPageView={viewPage} 
+            setMainPageState={setViewPage}
+            setFormSetting={setFormSetting}
+          />
+        }
+        {
+          viewPage === "approval2" &&
+          <ApprovalPage
+            mainPageView={viewPage} 
+            setMainPageState={setViewPage}
+            setFormSetting={setFormSetting}
+          />
+        }
+        {
+          viewPage === "approval3" &&
+          <ApprovalPage
+            mainPageView={viewPage} 
+            setMainPageState={setViewPage}
+            setFormSetting={setFormSetting}
+          />
+        }
+        {
+          viewPage === "approval4" &&
           <ApprovalPage
             mainPageView={viewPage} 
             setMainPageState={setViewPage}
@@ -80,6 +111,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
       </Stack>
     </WebpartContext.Provider>
     </UserContext>
+    </DialogContext>
     </NotificationContext>
     </ErrorBoundary>
   );

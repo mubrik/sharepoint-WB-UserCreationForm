@@ -1,7 +1,8 @@
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 
-export type mainPageView = "new" | "about" | "approval1";
+export type mainPageView = "new" | "about" | "approval1"| "approval2"| "approval3"| "approval4" | "search";
 export type NotificationType = "error" | "info" | "success" | "warning";
+export type approvalIndex = "Approver1" | "Approver2"  |"Approver3" | "Approver4";
 export type approvalStatus = "Approved" | "Pending" | "Rejected";
 export type businessJustification = "Job Replacement" | "New Work Scope";
 // keys of data
@@ -10,24 +11,25 @@ export type keysOfFullFormData = keyof IFullFormData;
 // layout type
 export type paneLayoutState = "double" | "single";
 export type formSettings = {
-  mode: "new" | "readOnly";
+  mode: "new" | "readOnly" | "approval";
   id?: number;
 }
 
+export interface IUserApproverData {
+  isUserApproverOne?: boolean;
+  isUserApproverTwo?: boolean;
+  isUserApproverThree?: boolean;
+  isUserApproverFour?: boolean;
+}
 
-export interface IUserData {
+export interface IUserData extends IUserApproverData {
   ok?: boolean;
   id?: number;
   email?: string;
   displayName?: string;
   manager?: string;
   jobTitle?: string;
-  isUserHr? : boolean;
-  isUserManager? : boolean;
-  isUserGroupHead? : boolean;
-  isUserApproverOne? : boolean;
 }
-
 export interface IServer {
   fetch: typeof sp;
   testing(): Promise<void>;
@@ -54,11 +56,12 @@ export interface IFormUserData {
   address: string;
   city: string;
   country: string;
+  comment: string;
 }
 
 interface IFormBusinessData {
   jobTitle: string;
-  office: string;
+  sbu: string;
   department: string;
   supervisorEmail: string;
   dangoteEmail: string;
@@ -93,6 +96,7 @@ export interface ISharepointFullFormData {
   Address: string;
   City: string;
   Country: string;
+  Comment: string;
   JobTitle: string;
   Office: string;
   Department: string;
@@ -108,6 +112,10 @@ export interface ISharepointFullFormData {
   Approver1Status: approvalStatus;
   Approver2: string;
   Approver2Status: approvalStatus;
+  Approver3: string;
+  Approver3Status: approvalStatus;
+  Approver4: string;
+  Approver4Status: approvalStatus;
 }
 
 interface ISharepointApprovalData {
@@ -115,6 +123,10 @@ interface ISharepointApprovalData {
   Approver1Status?: approvalStatus;
   Approver2?: string;
   Approver2Status?: approvalStatus;
+  Approver3?: string;
+  Approver3Status?: approvalStatus;
+  Approver4?: string;
+  Approver4Status?: approvalStatus;
 }
 
 
