@@ -19,6 +19,7 @@
     "office-ui-fabric-react": "7.174.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-phone-input-2": "^2.14.0",
     "react-responsive": "^9.0.0-beta.5"
   },
   "devDependencies": {

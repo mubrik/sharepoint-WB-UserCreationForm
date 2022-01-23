@@ -4,7 +4,7 @@ import {
   PrimaryButton,
   DefaultButton, DialogType,
   Dialog,
-  DialogFooter
+  DialogFooter, TextField
 } from "office-ui-fabric-react";
 // custom util
 import createContext from "../utils/createContext";
@@ -17,8 +17,11 @@ interface IDialogProps {
 export interface IDialogState {
   show: boolean;
   msg: string;
+  buttonText?: string;
+  type?: "approve" | "normal";
   onAccept?(): void;
   onClose?(): void;
+  onApprove?(param: string): void;
 }
 
 const initialState = {
@@ -32,6 +35,7 @@ const [useDialog, DialogProvider] =
 export default ({ children }:IDialogProps) :JSX.Element => {
   // state
   const [dialogState, setDialogState] = React.useState<IDialogState>(initialState);
+  const [comment, setComment] = React.useState("");
 
   // handler
   const handleDismiss = (): void => {
@@ -62,6 +66,24 @@ export default ({ children }:IDialogProps) :JSX.Element => {
     }
   };
 
+  const handleApproval = (): void => {
+    const { onApprove } = dialogState;
+
+    if (onApprove) {
+      onApprove(comment);
+    }
+
+    // dismiss
+    setDialogState({
+      show: false,
+      msg: "",
+      type: "normal"
+    });
+
+    // clear comment
+    setComment("");
+  };
+ 
   return(
     <DialogProvider value={setDialogState}>
       {
@@ -74,9 +96,23 @@ export default ({ children }:IDialogProps) :JSX.Element => {
             title: dialogState.msg
           }}
         >
+          {
+            dialogState.type === "approve" &&
+            <>
+              <TextField 
+                multiline
+                label={"Comments?"}
+                value={comment}
+                onChange={(_, newValue) => setComment(newValue as string)}
+              />
+            </>
+          }
           <DialogFooter>
-            <PrimaryButton onClick={handleAccept} text="Load" />
-            <DefaultButton onClick={handleDismiss} text="Close" />
+            <PrimaryButton 
+              onClick={ dialogState.type === "approve" ? handleApproval : handleAccept} 
+              text={dialogState.buttonText ? dialogState.buttonText : "Load"}
+            />
+            <DefaultButton onClick={handleDismiss} text="Cancel" />
           </DialogFooter>
         </Dialog>
       }

@@ -3,87 +3,149 @@ import * as React from "react";
 // ui
 import { 
   Stack, Dropdown, 
-  StackItem, IDropdownOption 
+  StackItem, IDropdownOption,
+  Spinner, Label, SelectionMode
 } from "office-ui-fabric-react";
-import { ListView, IViewField, SelectionMode, GroupOrder, IGrouping } from "@pnp/spfx-controls-react/lib/ListView";
+import { ListView, 
+  IViewField,
+} from "@pnp/spfx-controls-react/lib/ListView";
+// types
+import { formSettings, mainPageView,
+  ISharepointFullFormData, IFullFormData
+} from "../../types/custom";
+// data
+import { 
+  locationOpts, agrosackSbuOpts,
+  dcpSbuOpts, dfmSbuOpts, dancomSbuOpts,
+  contractorsSbuOpts, dsrSbuOpts,
+  otherSbuOpts
+} from "../utils/optionData";
 // server
 import fetchServer from "../../controller/server";
+// custom
+import ListContextualMenu from "../utils/ListContextualMenu";
+// utils
+import convertSpDataToFormData from "../utils/convertSpDataToFormData";
 
-const sbuOpts: IDropdownOption[] = [
-  {key: "DCP-Ibese", text: "DCP-Ibese"},
-  {key: "DCP-Transport Ibese", text: "DCP-Transport Ibese"},
-  {key: "DCP-Transport Gboko", text: "DCP-Transport Gboko"},
-  {key: "DCP-Transport Obajana", text: "DCP-Transport Obajana"},
-  {key: "DCP-Obajana", text: "DCP-Obajana"},
-  {key: "DCP-Gboko", text: "DCP-Gboko"},
-  {key: "DCP-Cameroun", text: "DCP-Cameroun"},
-  {key: "DCP-Congo", text: "DCP-Congo"},
-  {key: "DCP-Ethopia", text: "DCP-Ethopia"},
-  {key: "DCP-Ghana", text: "DCP-Ghana"},
-  {key: "DCP-HQ", text: "DCP-HQ"},
-  {key: "DCP-Okpella", text: "DCP-Okpella"},
-  {key: "DCP-Senegal", text: "DCP-Senegal"},
-  {key: "DCP-Sierra Leone", text: "DCP-Sierra Leone"},
-  {key: "DCP-Tanzania", text: "DCP-Tanzania"},
-  {key: "DCP-Zambia", text: "DCP-Zambia"},
-];
+interface IComponentProps {
+  setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
+  setMainPageState: React.Dispatch<React.SetStateAction<mainPageView>>;
+}
 
-const viewFields: IViewField[] = [
-  { name: "creatorEmail", displayName: "Creator", sorting: true, isResizable: true, maxWidth: 150 },
-  { name: "FirstName", sorting: true, isResizable: true, maxWidth: 100 },
-  { name: "LastName", sorting: true, isResizable: true },
-  { name: "Office", sorting: true, isResizable: true  },
-  { name: "Department", isResizable: true  },
-  { name: "DangoteEmail", isResizable: true  },
-  { name: "BusinessJustification", isResizable: true  },
-  { name: "Approver1Status", isResizable: true  },
-  { name: "Approver2Status", isResizable: true  },
-  { name: "Approver3Status", isResizable: true  },
-  { name: "Approver4Status", isResizable: true  },
-];
+export default ({setFormSetting, setMainPageState}: IComponentProps): JSX.Element => {
 
-export default (): JSX.Element => {
-
-  const [dropDownOption, setDropDownOption] = React.useState<IDropdownOption>({key: "blank", text: ""});
-  const [filterList, setFilterList] = React.useState<any[]>([]);
+  const [sbuOption, setSbuOption] = React.useState<IDropdownOption | undefined>(undefined);
+  const [officeOption, setOfficeOption] = React.useState<IDropdownOption | undefined>(undefined);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [filterList, setFilterList] = React.useState<IFullFormData[]>([]);
 
   // fetch effect
   React.useEffect(() => {
-
-    if (dropDownOption.key !== "blank") {
-      fetchServer.getListFilterBySbu(dropDownOption.key as string)
+    if (officeOption) {
+      setIsLoading(true);
+      fetchServer.getListFilterBySbu(officeOption.key as string)
       .then(result => {
-        setFilterList(result);
+        setFilterList(result.map(item => convertSpDataToFormData(item)));
       })
       .catch(error => {
         console.log(error);
       })
+      .finally(() => setIsLoading(false));
     }
 
-  }, [dropDownOption]);
+  }, [officeOption]);
+
+
+  // handler for contx menu
+  const handleViewClick = (id: number): void => {
+    // set form setting
+    setFormSetting({
+      mode: "readOnly",
+      id: id
+    });
+    // switch views
+    setMainPageState("new");
+  };
+
+  const handleEditClick = (id: number): void => {
+    // set form setting
+    setFormSetting({
+      mode: "edit",
+      id: id
+    });
+    // switch views
+    setMainPageState("new");
+  };
+
+  const viewFields: IViewField[] = React.useMemo(() => {
+    return [
+      { name: "creatorEmail", displayName: "Creator", sorting: true, isResizable: true, maxWidth: 150 },
+      { name: "", sorting: false, maxWidth: 20 , 
+        render: (item: IFullFormData) => 
+        <ListContextualMenu 
+          data={item} 
+          handleView={handleViewClick}
+          handleEdit={handleEditClick}
+          enableApproval={false}
+        />
+      },
+      { name: "firstName", displayName: "First Name", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "lastName", displayName: "Last Name", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "office",  displayName: "Office", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "department",  displayName: "Department", isResizable: true, maxWidth: 80},
+      { name: "approver1Status", displayName: "SBU-HR", isResizable: true, maxWidth: 120 },
+      { name: "approver2Status", displayName: "HR", isResizable: true, maxWidth: 120 },
+      { name: "approver3Status", displayName: "IT", isResizable: true, maxWidth: 120 },
+      { name: "approver4Status", displayName: "GHIT", isResizable: true, maxWidth: 120 },
+    ];
+  }, [officeOption, filterList]);
 
   return(
-    <Stack tokens={{ childrenGap: 8}}>
-      <StackItem>
-        <Dropdown 
-          label="Select Your SBU"
-          selectedKey={dropDownOption.key}
-          options={sbuOpts}
-          onChange={(_, newValue) => setDropDownOption(newValue as IDropdownOption)}
-        />
-      </StackItem>
+    <Stack tokens={{ childrenGap: 8 }}>
+      <Stack tokens={{ childrenGap: 6 }} horizontal>
+        <StackItem grow>
+          <Dropdown 
+            label="Select Your SBU"
+            selectedKey={sbuOption ? sbuOption.key : sbuOption}
+            options={locationOpts}
+            onChange={(_, newValue) => setSbuOption(newValue as IDropdownOption)}
+          />
+        </StackItem>
+        <StackItem grow>
+          <Dropdown 
+            disabled={sbuOption ? false : true}
+            label="Select Office"
+            selectedKey={officeOption ? officeOption.key : officeOption}
+            options={
+              sbuOption?.key === "Agrosacks" ? agrosackSbuOpts :
+              sbuOption?.key === "Contractors" ? contractorsSbuOpts :
+              sbuOption?.key === "Dancom" ? dancomSbuOpts :
+              sbuOption?.key === "DCP" ? dcpSbuOpts :
+              sbuOption?.key === "DSR" ? dsrSbuOpts :
+              sbuOption?.key === "Flour" ? dfmSbuOpts : otherSbuOpts
+            }
+            onChange={(_, newValue) => setOfficeOption(newValue as IDropdownOption)}
+          />
+        </StackItem>
+
+      </Stack>
       <StackItem>
       {
-        dropDownOption.key === "blank" ?
-        <p> Please select your SBU </p> :
+        officeOption === undefined ?
+        <p> Please select Office </p> :
+        isLoading ? 
+        <>
+          <Spinner label="I am definitely loading..." />
+        </> :
         filterList.length === 0 ? 
-        <p> No items for that SBU </p> :
+        <p> No items for that Office </p> :
         <ListView 
           compact
           showFilter
           stickyHeader
           items={filterList}
           viewFields={viewFields}
+          selectionMode={SelectionMode.single}
         />
       }
       </StackItem>

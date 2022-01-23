@@ -11,6 +11,7 @@ import type {
 } from "../../types/custom";
 // custom comp
 import ResponsiveTextField from "../utils/ResponsiveTextField";
+import PhoneInputField from "../utils/PhoneInputField";
 // query
 import { useMediaQuery } from "react-responsive";
 // utils
@@ -32,6 +33,8 @@ const titleDropdownOpts = [
   {key: "Mr", text: "Mr"},
   {key: "Mrs", text: "Mrs"},
   {key: "Miss", text: "Miss"},
+  {key: "Dr", text: "Dr"},
+  {key: "Engr", text: "Engr"},
 ];
 
 // trying out memoised components to save on re rendering, not super useful cause
@@ -45,7 +48,7 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
   const userFormArr: keysOfFullFormData[] = [
     "title", "firstName",
     "lastName", "mobileNumber",
-    "privateEmail", "privateNumber",
+    "privateEmail", "workNumber",
     "initials", "address", "city", "country",
     "comment"
   ];
@@ -54,6 +57,10 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
   // compare
   // layout first
   if (prevProps.layout !== nextProps.layout) {
+    return false;
+  }
+  // form mode
+  if (prevProps.formSetting.mode !== nextProps.formSetting.mode) {
     return false;
   }
   // form props
@@ -67,9 +74,7 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
 };
 
 export default React.memo(
-  ({formData, setFormData, layout, formSetting}: IComponentProps): JSX.Element => {
-    // for alignment
-    const horizAlign = layout === "single" ? "center" : undefined;
+  ({formData, setFormData, formSetting}: IComponentProps): JSX.Element => {
     // responsive
     const isWideScreen = useMediaQuery({ minWidth: 688});
     // readonly
@@ -95,8 +100,8 @@ export default React.memo(
               <StackItem shrink align="start">
                 <Dropdown
                   label={"Title"}
-                  disabled={_disabled}
                   required={_required}
+                  disabled={_disabled}
                   selectedKey={formData.title}
                   options={titleDropdownOpts}
                   onChange={(_, newValue) => setFormData("title", newValue?.text)}
@@ -130,26 +135,22 @@ export default React.memo(
               tokens={{ childrenGap : 8}}
               horizontal={isWideScreen ? true : undefined}
             >
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={_readOnly}
-                  required={_required}
-                  prefix="Mobile Number"
+              <StackItem grow={1} align={isWideScreen ? "end" : undefined}>
+                <PhoneInputField
+                  label="Mobile Number"
                   value={formData.mobileNumber}
-                  onChange={(_, newValue) => setFormData("mobileNumber", newValue as string)}
-                  onGetErrorMessage={numberFieldValidator}
-                  validateOnLoad={false}
-                  validateOnFocusOut
-                  type="tel"
+                  required={_required}
+                  disabled={_disabled}
+                  onChange={(newValue) => setFormData("mobileNumber", newValue as string)}
                 />
               </StackItem>
-              <StackItem grow={1}>
-                <ResponsiveTextField
-                  readOnly={_readOnly}
-                  prefix="Private Number"
-                  value={formData.privateNumber}
-                  onChange={(_, newValue) => setFormData("privateNumber", newValue as string)}
-                  type="tel"
+              <StackItem grow={1} align={isWideScreen ? "end" : undefined}>
+                <PhoneInputField
+                  label="Work Number"
+                  value={formData.workNumber}
+                  required={_required}
+                  disabled={_disabled}
+                  onChange={(newValue) => setFormData("workNumber", newValue as string)}
                 />
               </StackItem>
             </Stack>
@@ -176,7 +177,6 @@ export default React.memo(
                   onChange={(_, newValue) => setFormData("privateEmail", newValue as string)}
                   onGetErrorMessage={emailFieldValidator}
                   validateOnLoad={false}
-                  validateOnFocusOut
                   type="email"
                 />
               </StackItem>

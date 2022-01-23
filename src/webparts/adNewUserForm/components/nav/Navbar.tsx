@@ -5,7 +5,9 @@ import {
   IContextualMenuProps, mergeStyleSets
 } from "office-ui-fabric-react";
 // types
-import { mainPageView } from "../../types/custom";
+import { 
+  mainPageView, formSettings
+} from "../../types/custom";
 // user
 import { useUserData } from "../userContext/UserContext";
 // query
@@ -21,15 +23,17 @@ const classes = mergeStyleSets({
 export interface IComponentProps {
   pageState: string;
   setPageState: React.Dispatch<React.SetStateAction<mainPageView>>;
+  formSetting: formSettings;
+  setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
 }
 
-export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
+export default ({ pageState, setPageState, formSetting, setFormSetting }: IComponentProps): JSX.Element => {
   
   // user
   const { isUserApproverOne, isUserApproverTwo,
   isUserApproverThree, isUserApproverFour } = useUserData();
   // responsive
-  const medium = useMediaQuery({ maxWidth: 600 });
+  const isMediumScreen = useMediaQuery({ maxWidth: 600 });
   // nav button menu props
   const menuProps: IContextualMenuProps = {
     items: [
@@ -38,6 +42,12 @@ export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
         text: 'New User',
         iconProps: { iconName: 'NewTeamProject' },
         onClick: () => setPageState("new")
+      },
+      {
+        key: 'search',
+        text: 'Search',
+        iconProps: { iconName: 'Search' },
+        onClick: () => setPageState("search")
       },
       {
         key: 'about',
@@ -51,18 +61,48 @@ export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
   if (isUserApproverOne) {
     menuProps.items.push(
       {
-        key: 'approval',
-        text: 'Approval',
+        key: 'approval1',
+        text: 'SBU HR Approval',
         iconProps: { iconName: 'View' },
-        onClick: () => setPageState("approval1")
+        onClick: () => setPageState("Approver1")
       }
-    )
+    );
+  }
+  if (isUserApproverTwo) {
+    menuProps.items.push(
+      {
+        key: 'approval2',
+        text: 'Head HR Approval',
+        iconProps: { iconName: 'View' },
+        onClick: () => setPageState("Approver2")
+      }
+    );
+  }
+  if (isUserApproverThree) {
+    menuProps.items.push(
+      {
+        key: 'approval3',
+        text: 'IT Approval',
+        iconProps: { iconName: 'View' },
+        onClick: () => setPageState("Approver3")
+      }
+    );
+  }
+  if (isUserApproverFour) {
+    menuProps.items.push(
+      {
+        key: 'approval4',
+        text: 'GHIT Approval',
+        iconProps: { iconName: 'View' },
+        onClick: () => setPageState("Approver4")
+      }
+    );
   }
 
   return (
     <Stack>
       {
-        medium ?
+        isMediumScreen ?
         <Stack.Item>
           <DefaultButton
             text="MENU"
@@ -74,17 +114,23 @@ export default ({ pageState, setPageState }: IComponentProps): JSX.Element => {
         <Pivot
           aria-label={"pivot"}
           onLinkClick={(item) => {
-            if (item)
-            setPageState(item.props.itemKey as mainPageView);
+            if (item) {
+              // checking if clicking away from new and if formmode is not new
+              if (item.props.itemKey !== "new" && formSetting.mode !== "new") {
+                // set to new to unmount items from page
+                setFormSetting({mode: "new"});
+              }
+              setPageState(item.props.itemKey as mainPageView);
+            }
           }}
           selectedKey={pageState}
         >
           <PivotItem headerText="New User" itemKey="new" />
           <PivotItem headerText="Search" itemKey="search" />
-          {isUserApproverOne && <PivotItem headerText="Approval 1" itemKey="approval1" />}
-          {isUserApproverTwo && <PivotItem headerText="Approval 2" itemKey="approval2" />}
-          {isUserApproverThree && <PivotItem headerText="Approval 3" itemKey="approval3" />}
-          {isUserApproverFour && <PivotItem headerText="Approval 4" itemKey="approval4" />}
+          {isUserApproverOne && <PivotItem headerText="SBU HR Approval" itemKey="Approver1" />}
+          {isUserApproverTwo && <PivotItem headerText="Head HR Approval" itemKey="Approver2" />}
+          {isUserApproverThree && <PivotItem headerText="IT Approval" itemKey="Approver3" />}
+          {isUserApproverFour && <PivotItem headerText="GHIT Approval" itemKey="Approver4" />}
           <PivotItem headerText="About" itemKey="about" />
         </Pivot>
       }

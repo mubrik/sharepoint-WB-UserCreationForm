@@ -16,8 +16,16 @@ import PeoplePickerComp from "../utils/PeoplePickerComp";
 import CustomMultiCheckBox from "../utils/CustomMultiCheckBox";
 // query
 import { useMediaQuery } from "react-responsive";
+// init data
+import { 
+  locationOpts, dcpSbuOpts, agrosackSbuOpts,
+  contractorsSbuOpts, dancomSbuOpts, dsrSbuOpts,
+  dfmSbuOpts, otherSbuOpts
+} from "../utils/optionData";
 // utils
 import { pick } from "lodash";
+// validators 
+import { emailFieldValidator } from "../validator/validator";
 
 
 
@@ -27,24 +35,6 @@ const salaryStepDropdownOpts: IDropdownOption[] = [];
 const businessJustificationOpts: IDropdownOption[] = [
   {key: "New Work Scope", text: "New Work Scope"},
   {key: "Job Replacement", text: "Job Replacement"}
-];
-const sbuOpts: IDropdownOption[] = [
-  {key: "DCP-Ibese", text: "DCP-Ibese"},
-  {key: "DCP-Transport Ibese", text: "DCP-Transport Ibese"},
-  {key: "DCP-Transport Gboko", text: "DCP-Transport Gboko"},
-  {key: "DCP-Transport Obajana", text: "DCP-Transport Obajana"},
-  {key: "DCP-Obajana", text: "DCP-Obajana"},
-  {key: "DCP-Gboko", text: "DCP-Gboko"},
-  {key: "DCP-Cameroun", text: "DCP-Cameroun"},
-  {key: "DCP-Congo", text: "DCP-Congo"},
-  {key: "DCP-Ethopia", text: "DCP-Ethopia"},
-  {key: "DCP-Ghana", text: "DCP-Ghana"},
-  {key: "DCP-HQ", text: "DCP-HQ"},
-  {key: "DCP-Okpella", text: "DCP-Okpella"},
-  {key: "DCP-Senegal", text: "DCP-Senegal"},
-  {key: "DCP-Sierra Leone", text: "DCP-Sierra Leone"},
-  {key: "DCP-Tanzania", text: "DCP-Tanzania"},
-  {key: "DCP-Zambia", text: "DCP-Zambia"},
 ];
 
 // loop for steps and grade options
@@ -71,11 +61,15 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
     "department", "supervisorEmail",
     "dangoteEmail", "directReports",
     "salaryLevel", "salaryStep", "businessJustification",
-    "hardware", "staffReplaced"
+    "hardware", "staffReplaced", "office"
   ];
   // compare
   // layout first
   if (prevProps.layout !== nextProps.layout) {
+    return false;
+  }
+  // form mode
+  if (prevProps.formSetting.mode !== nextProps.formSetting.mode) {
     return false;
   }
   // filter
@@ -99,16 +93,15 @@ interface IComponentProps {
 }
 
 // main component
-export default React.memo(({formData, setFormData, layout, formSetting}: IComponentProps): JSX.Element => {
+export default React.memo(({formData, setFormData, formSetting}: IComponentProps): JSX.Element => {
 
-  // for alignment
-  const horizAlign = layout === "single" ? "center" : undefined;
   // responsive
   const isWideScreen = useMediaQuery({ minWidth: 688});
   // readonly
-  const _readOnly = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? true : undefined;
-  const _disabled = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? true : undefined;
-  const _required = (formSetting.mode === "readOnly" || formSetting.mode == "approval") ? undefined : true;
+  const isFormReadOrApproval = (formSetting.mode === "readOnly" || formSetting.mode == "approval");
+  const _readOnly = isFormReadOrApproval ? true : undefined;
+  const _disabled = isFormReadOrApproval ? true : undefined;
+  const _required = isFormReadOrApproval ? undefined : true;
 
   console.log("render bisinfo");
 
@@ -159,6 +152,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
             <StackItem grow>
               <ResponsiveTextField
                 readOnly={_readOnly}
+                required={_required}
                 prefix="Job Title"
                 value={formData.jobTitle}
                 onChange={(_, newValue) => setFormData("jobTitle", newValue as string)}
@@ -174,6 +168,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
             <StackItem grow>
               <ResponsiveTextField
                 readOnly={_readOnly}
+                required={_required}
                 prefix="Department"
                 value={formData.department}
                 onChange={(_, newValue) => setFormData("department", newValue as string)}
@@ -185,11 +180,43 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
                 prefix="Dangote Email"
                 value={formData.dangoteEmail}
                 onChange={(_, newValue) => setFormData("dangoteEmail", newValue as string)}
-                onGetErrorMessage={(value) => {
-                  return value.includes("@") ? "" : "Error, Not an email"
-                }}
+                onGetErrorMessage={emailFieldValidator}
                 validateOnLoad={false}
                 type="email"
+              />
+            </StackItem>
+          </Stack>
+        </StackItem>
+        <StackItem grow>
+          <Stack
+            tokens={{ childrenGap : 8}}
+            horizontal={isWideScreen ? true : undefined}
+          >
+            <StackItem grow={2}>
+              <Dropdown
+                label="SBU"
+                disabled={_disabled}
+                required={_required}
+                selectedKey={formData.sbu ? formData.sbu : undefined}
+                options={locationOpts}
+                onChange={(_, newValue) => setFormData("sbu", newValue?.text)}
+              />
+            </StackItem>
+            <StackItem grow={2}>
+              <Dropdown
+                label="Office"
+                disabled={_disabled}
+                required={_required}
+                selectedKey={formData.office ? formData.office : undefined}
+                options={
+                  formData.sbu === "Agrosacks" ? agrosackSbuOpts :
+                  formData.sbu === "Contractors" ? contractorsSbuOpts :
+                  formData.sbu === "Dancom" ? dancomSbuOpts :
+                  formData.sbu === "DCP" ? dcpSbuOpts :
+                  formData.sbu === "DSR" ? dsrSbuOpts :
+                  formData.sbu === "Flour" ? dfmSbuOpts : otherSbuOpts
+                }
+                onChange={(_, newValue) => setFormData("office", newValue?.text)}
               />
             </StackItem>
           </Stack>
@@ -229,7 +256,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
               grow
               tokens={{ childrenGap : 8}}
             >
-              <StackItem grow>
+              {/* <StackItem grow>
                 <Dropdown
                   label="SBU"
                   disabled={_disabled}
@@ -238,7 +265,7 @@ export default React.memo(({formData, setFormData, layout, formSetting}: ICompon
                   options={sbuOpts}
                   onChange={(_, newValue) => setFormData("sbu", newValue?.text)}
                 />
-              </StackItem>
+              </StackItem> */}
               <StackItem grow>
                 <ResponsiveTextField
                   readOnly={_readOnly}

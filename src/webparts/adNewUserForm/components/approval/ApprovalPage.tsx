@@ -3,9 +3,12 @@ import * as React from "react";
 import {Stack, DefaultButton,
   ContextualMenu, IContextualMenuProps,
   mergeStyleSets, Nav, INavLinkGroup, StackItem,
-  INavLink,
+  INavLink, SelectionMode,
   TextField
 } from "office-ui-fabric-react";
+import { ListView, 
+  IViewField,
+} from "@pnp/spfx-controls-react/lib/ListView";
 // hooks
 import { useNotification } from "../notification/NotificationBarContext";
 import { useUserData } from "../userContext/UserContext";
@@ -16,13 +19,42 @@ import {
   IUserData, mainPageView,
   ISharepointFullFormData,
   keysOfSharepointData,
+  keysOfFullFormData,
   approvalStatus, formSettings,
-  approvalIndex
+  approvalIndex, IFullFormData
 } from "../../types/custom";
 // query
 import { useMediaQuery } from "react-responsive";
 // custom comp
-import ApprovalItem from "./ApprovalItem";
+import ListContextualMenu from "../utils/ListContextualMenu";
+// utils
+import convertSpDataToFormData from "../utils/convertSpDataToFormData";
+
+
+
+interface ICompMainStateData {
+  data: IFullFormData[] | undefined;
+  status: "idle" | "loaded";
+}
+
+type viewPage = "Pending" | "Approved" | "Rejected" | "Queried" | "full";
+
+// initial data
+const initialData: ICompMainStateData = {
+  data: undefined,
+  status: "idle"
+};
+
+// styles
+const classes = mergeStyleSets({
+  navButton : {
+    width: "100%",
+  },
+  heightLimit: {
+    maxHeight: "75vh",
+    overflowY: "auto"
+  }
+});
 
 
 interface IComponentProps {
@@ -31,71 +63,12 @@ interface IComponentProps {
   setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
 }
 
-interface ICompMainStateData {
-  data: ISPData | null;
-  status: "idle" | "loaded";
-}
-
-interface ISPData {
-  full: ISharepointFullFormData[];
-  pending: ISharepointFullFormData[];
-  approved: ISharepointFullFormData[];
-  rejected: ISharepointFullFormData[];
-}
-
-type viewPage = "pending" | "approved" | "rejected" | "full";
-
-// initial data
-const initialData: ICompMainStateData = {
-  data: null,
-  status: "idle"
-};
-
-// nav item
-const navItems: INavLinkGroup[] = [
-  {
-    links: [
-      {
-        name: "All",
-        key: "full",
-        target: "_blank",
-        url: ""
-      },
-      {
-        name: "Pending",
-        key: "pending",
-        target: "_blank",
-        url: ""
-      }, 
-      {
-        name: "Approved",
-        key: "approved",
-        target: "_blank",
-        url: ""
-      }, {
-        name: "Rejected",
-        key: "rejected",
-        target: "_blank",
-        url: ""
-      }, 
-    ]
-  }
-];
-
-// styles
-const classes = mergeStyleSets({
-  navButton : {
-    width: "100%",
-  }
-});
-
 export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProps): JSX.Element => {
   
   // state
   const [stateData, setStateData] = React.useState(initialData); 
-  const [filteredData, setFilteredData] = React.useState<ISharepointFullFormData[] | null>(null); // the actual data to be shown
-  const [viewPage, setViewPage] = React.useState<viewPage>("pending"); // page view filter
-  const [filterText, setFilterText] = React.useState("");
+  const [filteredData, setFilteredData] = React.useState<IFullFormData[] | undefined>(undefined); // the actual data to be shown
+  const [viewPage, setViewPage] = React.useState<viewPage>("Pending"); // page view filter
   // context data
   const { email }: IUserData = useUserData();
   // notify
@@ -109,37 +82,14 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
       // var
       // approval page span multiple approvers
       // each page knows the approver they are fetching/updating from userdata > nav
-      let approverTag: approvalIndex = 
-        mainPageView === "approval1" ? "Approver1"
-        : mainPageView === "approval2" ? "Approver2"
-        : mainPageView === "approval3" ? "Approver3" : "Approver4";
-
       // get approver
-      fetchServer.getApproverList(email as string, approverTag)
+      fetchServer.getApproverList(email as string, mainPageView as approvalIndex)
         .then(result => {
-          // approver string
-          // arrays
-          const _pending: ISharepointFullFormData[] = [];
-          const _approved: ISharepointFullFormData[] = [];
-          const _rejected: ISharepointFullFormData[] = [];
-          // loop
-          result.forEach(item => {
-            if (item[`${approverTag}Status` as keysOfSharepointData] === "Pending") {
-              _pending.push(item);
-            } else if (item[`${approverTag}Status` as keysOfSharepointData] === "Approved") {
-              _approved.push(item);
-            } else if (item[`${approverTag}Status` as keysOfSharepointData] === "Rejected") {
-              _rejected.push(item);
-            }
-          });
+          // map
+          const _data: IFullFormData[] = result.map(item => convertSpDataToFormData(item));
           // set
           setStateData({
-            data: {
-              full: result,
-              approved: _approved,
-              pending: _pending,
-              rejected: _rejected,
-            },
+            data: _data,
             status: "loaded"
           });
         })
@@ -152,34 +102,41 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
   // effect for filter 
   React.useEffect(() => {
     if (stateData.status === "loaded" && stateData.data) {
-      const arrToFilter = stateData.data[viewPage].slice();
+      let approverTag = 
+        mainPageView === "Approver1" ? "approver1" : 
+        mainPageView === "Approver2" ? "approver2" :
+        mainPageView === "Approver3" ? "approver3" : "approver4";
 
-      // filter only if text
-      const filteredArr = filterText === "" ?  arrToFilter : arrToFilter.filter((item) => {
-        return `${item.FirstName} ${item.LastName}`.toLowerCase().includes(filterText.toLowerCase());
-      });
+      if (viewPage === "full") {
+        setFilteredData(stateData.data);
+      } else {
+        // filter
+        const arrToFilter = stateData.data.filter(item => item[`${approverTag}Status` as keysOfFullFormData] === viewPage);
 
-      setFilteredData(filteredArr);
+        setFilteredData(arrToFilter);
+      }
     }
-  }, [filterText, stateData, viewPage]);
+  }, [stateData, viewPage]);
 
-  // handlers
-  const handleApprovalAction = (id: number, param: approvalStatus): void => {
-    // call server
-    fetchServer.approveRejectEntry(id, mainPageView, param)
-    .then(_ => {
-      notify({show: true, isError: false, msg:"Item status updated"});
-      // update state to reload
-      setStateData(prevValue => ({
-        ...prevValue,
-        status: "idle"
-      }));
-    })
-    .catch(error => {
-      if (error instanceof Error)
-      notify({show: true, isError: true, msg:"Error Approving Item", errorObj: error});
-    });
-  };
+  // handlers, using usecallback cause passdown rerenders
+  // const handleApprovalAction = React.useCallback(
+  //   (id: number, param: approvalStatus): void => {
+  //    // call server
+  //    fetchServer.approveRejectEntry(id, mainPageView, param)
+  //    .then(_ => {
+  //      notify({show: true, isError: false, msg:"Item status updated"});
+  //      // update state to reload
+  //      setStateData(prevValue => ({
+  //        ...prevValue,
+  //        status: "idle"
+  //      }));
+  //    })
+  //    .catch(error => {
+  //      if (error instanceof Error)
+  //      notify({show: true, isError: true, msg:"Error Approving Item", errorObj: error});
+  //    });
+  //  }, [viewPage]
+  // );
 
   const handleViewClick = (id: number): void => {
     // set form setting
@@ -191,14 +148,6 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
     setMainPageState("new");
   };
 
-  const handleFilterValue = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string | undefined) => {
-    // add clean later for sanitized input
-    // checking undefined cause i need empty string to pass
-    if (typeof newValue !== "undefined") {
-      setFilterText(newValue);
-    }
-  };
-
   // for nav
   const _onLinkClick = (ev?: React.MouseEvent<HTMLElement>, item?: INavLink) =>  {
     ev?.preventDefault();
@@ -207,34 +156,109 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
     }
   };
 
-  const menuProps: IContextualMenuProps = {
-    items: [
+  // wide screen nav item, only need render once, instant return
+  const navItems: INavLinkGroup[] = React.useMemo(() => ([{
+    links: [
       {
-        key: 'all',
-        text: 'All',
-        iconProps: { iconName: 'NewTeamProject' },
-        onClick: () => setViewPage("full")
+        name: "All",
+        key: "full",
+        target: "_blank",
+        url: ""
       },
       {
-        key: 'pending',
-        text: 'Pending',
-        iconProps: { iconName: 'View' },
-        onClick: () => setViewPage("pending")
+        name: "Pending",
+        key: "Pending",
+        target: "_blank",
+        url: ""
+      }, 
+      {
+        name: "Approved",
+        key: "Approved",
+        target: "_blank",
+        url: ""
       },
       {
-        key: 'approved',
-        text: 'Approved',
-        iconProps: { iconName: 'View' },
-        onClick: () => setViewPage("approved")
-      },
+        name: "Queried",
+        key: "Queried",
+        target: "_blank",
+        url: ""
+      }, 
       {
-        key: 'rejected',
-        text: 'Rejected',
-        iconProps: { iconName: 'View' },
-        onClick: () => setViewPage("rejected")
-      }
-    ],
-  };
+        name: "Rejected",
+        key: "Rejected",
+        target: "_blank",
+        url: ""
+      }, 
+    ]
+  }]
+  ), []);
+
+  // mobile screen nav item, only need render once, instant return
+  const menuProps: IContextualMenuProps = React.useMemo(() => (
+    {
+      items: [
+        {
+          key: 'all',
+          text: 'All',
+          iconProps: { iconName: 'NewTeamProject' },
+          onClick: () => setViewPage("full")
+        },
+        {
+          key: 'pending',
+          text: 'Pending',
+          iconProps: { iconName: 'View' },
+          onClick: () => setViewPage("Pending")
+        },
+        {
+          key: 'approved',
+          text: 'Approved',
+          iconProps: { iconName: 'View' },
+          onClick: () => setViewPage("Approved")
+        },
+        {
+          key: 'queried',
+          text: 'Queried',
+          iconProps: { iconName: 'View' },
+          onClick: () => setViewPage("Queried")
+        },
+        {
+          key: 'rejected',
+          text: 'Rejected',
+          iconProps: { iconName: 'View' },
+          onClick: () => setViewPage("Rejected")
+        }
+      ],
+    }
+  ), []);
+
+  // view field options for listview
+  const viewFields: IViewField[] =  React.useMemo(() => {
+    return [
+      { name: "creatorEmail", displayName: "Creator", sorting: true, isResizable: true, maxWidth: 150 },
+      { name: "", sorting: false, maxWidth: 15 , 
+        render: (item: IFullFormData) => 
+        <ListContextualMenu 
+          data={item}
+          approverPage={mainPageView}
+          handleView={handleViewClick}
+          enableApproval={true}
+          onApproval={() => setStateData(prevValue => ({
+              ...prevValue,
+              status: "idle"
+            }))
+          }
+        />
+      },
+      { name: "firstName", displayName: "First Name", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "lastName", displayName: "Last Name", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "office",  displayName: "Office", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "department",  displayName: "Department", isResizable: true, maxWidth: 80},
+      { name: "approver1Status", displayName: "SBU HR", isResizable: true, minWidth: 70, maxWidth: 120 },
+      { name: "approver2Status", displayName: "HEAD HR", isResizable: true, minWidth: 70, maxWidth: 120 },
+      { name: "approver3Status", displayName: "IT", isResizable: true, minWidth: 70, maxWidth: 120 },
+      { name: "approver4Status", displayName: "GHIT", isResizable: true, minWidth: 70, maxWidth: 120 },
+    ]
+  }, [filteredData, viewPage]);
 
   return(
     <Stack 
@@ -258,32 +282,25 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
         }
       </StackItem>
       <StackItem grow>
-        <Stack tokens={{ childrenGap: 6}}>
-          <StackItem>
-            <TextField 
-              label="Filter Name:"
-              value={filterText}
-              onChange={handleFilterValue}
+        <Stack tokens={{ childrenGap: 6 }}>
+          {
+            filteredData === undefined &&
+            <div> Loading.. </div>
+          }
+          {
+            filteredData?.length === 0 &&
+            <div> Empty </div>
+          }
+          {
+            <ListView 
+              compact
+              showFilter
+              stickyHeader
+              items={filteredData}
+              viewFields={viewFields}
+              selectionMode={SelectionMode.single}
             />
-          </StackItem>
-        {
-          filteredData === null &&
-          <div> Loading.. </div>
-        }
-        {
-          filteredData?.length === 0 &&
-          <div> Empty </div>
-        }
-        {
-          filteredData?.map((item, index) => 
-            <ApprovalItem 
-              approvalItem={item}
-              index={index}
-              handleViewClick={handleViewClick}
-              handleApprovalAction={handleApprovalAction}
-            />
-          )
-        }
+          }
         </Stack>
       </StackItem>
     </Stack>

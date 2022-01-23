@@ -3,16 +3,18 @@ import * as React from "react";
 // button
 import { 
   PrimaryButton, IButtonProps,
-  Stack, ProgressIndicator
+  Stack, ProgressIndicator,
+  DefaultButton
 } from "office-ui-fabric-react";
 
 
 interface IComponentProps extends IButtonProps {
   loading?: boolean;
   loadingMsg?: string;
+  variant: "primary" | "secondary";
 }
 
-export default ({loading, loadingMsg, ...rest}: IComponentProps): JSX.Element => {
+export default ({loading, loadingMsg, variant, ...rest}: IComponentProps): JSX.Element => {
 
   return(
     <Stack grow tokens={{ childrenGap : 1 }}>
@@ -20,9 +22,15 @@ export default ({loading, loadingMsg, ...rest}: IComponentProps): JSX.Element =>
         loading &&
         <ProgressIndicator label={loadingMsg}/>
       }
-      <PrimaryButton 
-        {...rest}
-      />
+      {
+        variant === "primary" ?
+          <PrimaryButton 
+            {...rest}
+          /> :
+          <DefaultButton 
+            {...rest}
+          />
+      }
     </Stack>
   );
 };

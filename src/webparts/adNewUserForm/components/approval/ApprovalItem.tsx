@@ -44,6 +44,13 @@ const classes = mergeStyleSets({
     color: "red",
     textAlign: "center"
   },
+  itemBorder: {
+    padding: "5px",
+    margin: "2px 2px",
+    borderLeft: "1px solid black",
+    borderRight: "1px solid black",
+    textAlign: "center"
+  },
   itemButtonContainer: {
     padding: "2px",
     gap: "4px"
@@ -70,11 +77,16 @@ export default ({approvalItem, handleApprovalAction, handleViewClick, index}: IC
   // responsive
   const isNotWideScreen = useMediaQuery({ maxWidth: 940 });
 
+  // is dcp
+  const isDcp = approvalItem.Office.toLowerCase().includes("dcp") ? true : false;
+
   // classes
   const statusClass = {
     Approved: classes.itemStatusApproved,
     Pending: classes.itemStatusPending,
+    Queried: classes.itemStatusPending,
     Rejected: classes.itemStatusRejected,
+    NotAllowed: classes.itemStatusRejected,
   };
 
   const _getMenu = (menuProps: IContextualMenuProps): JSX.Element => {
@@ -84,12 +96,22 @@ export default ({approvalItem, handleApprovalAction, handleViewClick, index}: IC
 
   return(
     <Stack horizontal={isNotWideScreen ? false : true} key={index} className={classes.itemShadow}>
-      <Stack.Item shrink={4} grow className={classes.itemUsername}>User: {approvalItem.FirstName + approvalItem.LastName}</Stack.Item>
-      <Stack.Item shrink={4} grow className={classes.itemUsername}>By: {approvalItem.creatorEmail}</Stack.Item>
-      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver1Status]}>Approver1 Status: {approvalItem.Approver1Status}</Stack.Item>
-      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver2Status]}>Approver2 Status: {approvalItem.Approver2Status}</Stack.Item>
-      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver3Status]}>Approver3 Status: {approvalItem.Approver3Status}</Stack.Item>
-      <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver4Status]}>Approver4 Status: {approvalItem.Approver4Status}</Stack.Item>
+      {
+        isDcp ?
+        <>
+          <Stack.Item shrink={4} grow className={classes.itemBorder}>User: {approvalItem.FirstName} {approvalItem.LastName} </Stack.Item>
+          <Stack.Item shrink={4} grow className={classes.itemBorder}>Created By: {approvalItem.creatorEmail}</Stack.Item>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver1Status]}>Local HR Status: {approvalItem.Approver1Status}</Stack.Item>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver2Status]}>DCP Head HR Status: {approvalItem.Approver2Status}</Stack.Item>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver3Status]}>DCP Head IT Status: {approvalItem.Approver3Status}</Stack.Item>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver4Status]}>GHIT Status: {approvalItem.Approver4Status}</Stack.Item>
+        </> : 
+        <>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver1Status]}>Local HR Status: {approvalItem.Approver1Status}</Stack.Item>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver2Status]}>DCP Head HR Status: {approvalItem.Approver2Status}</Stack.Item>
+          <Stack.Item shrink={4} grow className={statusClass[approvalItem.Approver3Status]}>GHIT Status: {approvalItem.Approver4Status}</Stack.Item>
+        </>
+      }
       <Stack 
         horizontal
         className={classes.itemButtonContainer}

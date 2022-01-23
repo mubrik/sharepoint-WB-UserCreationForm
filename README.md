@@ -20,6 +20,9 @@ Short summary on functionality and used technologies.
 ## Prerequisites
 
 > Any special pre-requisites?
+- create a list named "HR-AD-Creation" on your sharepoint tenant
+- list columns should be shaped from interface ISharePointFullFormData
+- power automate is used for email notifications and updating status, updating can be done in the webpart as well
 
 ## Solution
 
@@ -49,7 +52,6 @@ Version|Date|Comments
   - **gulp serve**
 
 > Include any additional steps as needed.
-
 ## Features
 
 Description of the extension that expands upon high-level summary above.

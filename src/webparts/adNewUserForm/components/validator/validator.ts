@@ -13,7 +13,7 @@ export default ( param: IFullFormData ): [boolean, boolean, string] => {
   // data prop we dont really care much about
   const excludeProps = [
     "initials", "staffReplaced", "dangoteEmail",
-    "comment"
+    "comment", "hardware", "privateNumber", "approver1"
   ];
 
   // loop props to check empty
@@ -91,7 +91,8 @@ export const numberFieldValidator = (newValue: string): Promise<string> => {
 export const emailFieldValidator = (newValue: string): Promise<string> => {
 
   return new Promise((resolve, reject) => {
-    if (String(newValue).toLowerCase().match(/\S+@\S+\.\S+/)) {
+    // if empty dont validate
+    if (String(newValue).toLowerCase().match(/\S+@\S+\.\S+/) || String(newValue) === "") {
       resolve("");
     } else {
       resolve("Invalid Email");

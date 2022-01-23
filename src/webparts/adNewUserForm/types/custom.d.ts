@@ -1,9 +1,10 @@
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 
-export type mainPageView = "new" | "about" | "approval1"| "approval2"| "approval3"| "approval4" | "search";
+export type mainPageView = "new" | "about" | "Approver1" | "Approver2"  |"Approver3" | "Approver4" | "search";
 export type NotificationType = "error" | "info" | "success" | "warning";
+// export type approvalPages = "approval1"| "approval2"| "approval3"| "approval4";
 export type approvalIndex = "Approver1" | "Approver2"  |"Approver3" | "Approver4";
-export type approvalStatus = "Approved" | "Pending" | "Rejected";
+export type approvalStatus = "Approved" | "Pending" | "Rejected" | "Queried" | "NotAllowed";
 export type businessJustification = "Job Replacement" | "New Work Scope";
 // keys of data
 export type keysOfSharepointData = keyof ISharepointFullFormData;
@@ -11,11 +12,12 @@ export type keysOfFullFormData = keyof IFullFormData;
 // layout type
 export type paneLayoutState = "double" | "single";
 export type formSettings = {
-  mode: "new" | "readOnly" | "approval";
+  mode: "new" | "readOnly" | "approval" | "edit";
   id?: number;
 }
 
 export interface IUserApproverData {
+  role?: "user" | "approver" | "admin";
   isUserApproverOne?: boolean;
   isUserApproverTwo?: boolean;
   isUserApproverThree?: boolean;
@@ -51,8 +53,9 @@ export interface IFormUserData {
   lastName: string;
   initials: string
   privateEmail: string;
-  privateNumber: string;
+  workNumber: string;
   mobileNumber: string;
+  privateNumber: string;
   address: string;
   city: string;
   country: string;
@@ -61,7 +64,8 @@ export interface IFormUserData {
 
 interface IFormBusinessData {
   jobTitle: string;
-  sbu: string;
+  sbu: "Agrosacks" | "Flour" | "DCP" | "DSR" | "Others" | "Dancom"| "Contractors" | "";
+  office: string;
   department: string;
   supervisorEmail: string;
   dangoteEmail: string;
@@ -81,6 +85,24 @@ interface IFormHardwareData {
 
 export interface IFullFormData extends IFormUserData,IFormBusinessData,IFormJustificationData,IFormHardwareData {
   id? : number;
+  creatorEmail?: string;
+  isDcp?: "Yes" | "No";
+  approver1? : string;
+  approver1Status?: approvalStatus;
+  approver1Query?: string;
+  approver1Date?: Date;
+  approver2?: string;
+  approver2Status?: approvalStatus;
+  approver2Query?: string;
+  approver2Date?: Date;
+  approver3?: string;
+  approver3Status?: approvalStatus;
+  approver3Query?: string;
+  approver3Date?: Date;
+  approver4?: string;
+  approver4Status?: approvalStatus;
+  approver4Query?: string;
+  approver4Date?: Date;
 }
 
 export interface ISharepointFullFormData {
@@ -92,13 +114,16 @@ export interface ISharepointFullFormData {
   Initials: string
   PrivateEmail: string;
   PrivateNumber: string;
+  WorkNumber: string;
   MobileNumber: string;
+  PrivateNumber: string;
   Address: string;
   City: string;
   Country: string;
   Comment: string;
   JobTitle: string;
   Office: string;
+  Sbu: "Agrosacks" | "Flour" | "DCP" | "DSR" | "Others" | "Dancom"| "Contractors" | "";
   Department: string;
   SupervisorEmail: string;
   DangoteEmail: string;
@@ -110,23 +135,59 @@ export interface ISharepointFullFormData {
   Hardware: string;
   Approver1: string;
   Approver1Status: approvalStatus;
+  Approver1Query: string;
+  Approver1Date: Date;
   Approver2: string;
   Approver2Status: approvalStatus;
+  Approver2Query: string;
+  Approver2Date: Date;
   Approver3: string;
   Approver3Status: approvalStatus;
+  Approver3Query: string;
+  Approver3Date: Date;
   Approver4: string;
   Approver4Status: approvalStatus;
+  Approver4Query: string;
+  Approver4Date: Date;
+  isDcp: "Yes" | "No";
 }
 
 interface ISharepointApprovalData {
   Approver1?: string;
   Approver1Status?: approvalStatus;
+  Approver1Query?: string;
+  Approver1Date?: Date;
   Approver2?: string;
   Approver2Status?: approvalStatus;
+  Approver2Query?: string;
+  Approver2Date?: Date;
   Approver3?: string;
   Approver3Status?: approvalStatus;
+  Approver3Query?: string;
+  Approver3Date?: Date;
   Approver4?: string;
   Approver4Status?: approvalStatus;
+  Approver4Query?: string;
+  Approver4Date?: Date;
 }
 
+interface ISharepointOfficeApproverData {
+  name: string;
+  office: string;
+  email: string;
+}
 
+interface ISharepointApprovers {
+  Approver2: string;
+  Approver3?: string;
+  Approver4: string;
+}
+export interface IApproverObj {
+  name: string;
+  status: string;
+}
+
+export interface profileDetail {
+  name: string;
+  imageUrl: string;
+}

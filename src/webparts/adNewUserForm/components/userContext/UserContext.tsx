@@ -35,18 +35,6 @@ export default ({children}: IComponentProps): JSX.Element => {
         console.log("got user");
         return result.email;
       })
-      .then(email => {
-        console.log("gettingt user");
-        if (email) {
-          fetchServer.getUserApprovers(email)
-          .then( (approvers) =>
-            setUserData( prevValue => ({
-              ...prevValue,
-              ...approvers
-            }))
-          );
-        }
-      })
       .catch(error => {
         if (error instanceof Error && "message" in error) {
           notify({show: true, isError: true, msg: error.message, errorObj: error});
@@ -55,13 +43,6 @@ export default ({children}: IComponentProps): JSX.Element => {
       });
     }
   }, []);
-
-  // effect for approvers, list so might take time seperate from basic user props
-  // React.useEffect(() => {
-  //   if (userData.email) {
-
-  //   }
-  // }, [userData]); 
 
   return(
     <UserProvider value={userData}>

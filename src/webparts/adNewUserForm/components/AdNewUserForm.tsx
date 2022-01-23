@@ -60,7 +60,12 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
     <UserContext>
     <WebpartContext.Provider value={webpartData}>
       <Stack tokens={{childrenGap : 8}}>
-        <Navbar pageState={viewPage} setPageState={setViewPage}/>
+        <Navbar 
+          pageState={viewPage} 
+          setPageState={setViewPage}
+          formSetting={formSetting}
+          setFormSetting={setFormSetting}
+        />
         {
           viewPage === "new" &&
           <MainFormPage 
@@ -70,10 +75,13 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
         }
         {
           viewPage === "search" &&
-          <SearchPage />
+          <SearchPage 
+            setMainPageState={setViewPage}
+            setFormSetting={setFormSetting}
+          />
         }
         {
-          viewPage === "approval1" &&
+          viewPage === "Approver1" &&
           <ApprovalPage
             mainPageView={viewPage} 
             setMainPageState={setViewPage}
@@ -81,7 +89,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
           />
         }
         {
-          viewPage === "approval2" &&
+          viewPage === "Approver2" &&
           <ApprovalPage
             mainPageView={viewPage} 
             setMainPageState={setViewPage}
@@ -89,7 +97,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
           />
         }
         {
-          viewPage === "approval3" &&
+          viewPage === "Approver3" &&
           <ApprovalPage
             mainPageView={viewPage} 
             setMainPageState={setViewPage}
@@ -97,7 +105,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
           />
         }
         {
-          viewPage === "approval4" &&
+          viewPage === "Approver4" &&
           <ApprovalPage
             mainPageView={viewPage} 
             setMainPageState={setViewPage}

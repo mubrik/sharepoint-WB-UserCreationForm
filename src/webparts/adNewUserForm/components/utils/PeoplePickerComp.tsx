@@ -34,12 +34,12 @@ export default ({ formData, setFormData, disabled }:IComponentProps): JSX.Elemen
 
   return(
     <PeoplePicker
+      disabled={disabled ? disabled : false}
+      required={true}
       context={webpartData?.context as any} // casting as any cause the types dont match but it works
       defaultSelectedUsers={formData.supervisorEmail === "" ? undefined : [formData.supervisorEmail]}
-      disabled={disabled ? disabled : false}
       titleText={"Supervisor"}
       personSelectionLimit={1}
-      required={true}
       onChange={handleChange}
       showHiddenInUI={false}
       principalTypes={[PrincipalType.User]}

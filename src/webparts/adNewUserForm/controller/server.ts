@@ -13,7 +13,10 @@ import {
   IFullFormData,
   ISharepointFullFormData,
   mainPageView, ISharepointApprovalData,
-  approvalStatus, IUserApproverData
+  approvalStatus, IUserApproverData,
+  keysOfSharepointData, profileDetail,
+  ISharepointOfficeApproverData,
+  ISharepointApprovers
 } from "../types/custom";
 
 type approvalIndex = "Approver1" | "Approver2"  |"Approver3" | "Approver4";
@@ -29,19 +32,23 @@ class Server implements IServer{
     this.adCreateList = this.fetch.web.lists.getByTitle("HR-AD-Creation");
   }
 
-  public testing = (): Promise<any> => {
+  public testing = async (): Promise<any> => {
+    const arrList = await this.fetch.profiles.clientPeoplePickerSearchUser({
+      AllowEmailAddresses: true,
+      AllowMultipleEntities: false,
+      MaximumEntitySuggestions: 1,
+      QueryString: "mubarak.yahaya@dangote.com"
+    });
+
+    const _user = arrList[0];
+
     return new Promise((resolve, reject) => {
-      this.fetch.profiles.clientPeoplePickerSearchUser({
-        AllowEmailAddresses: true,
-        AllowMultipleEntities: false,
-        MaximumEntitySuggestions: 1,
-        QueryString: "musa.millapo"
+      this.fetch.profiles.getPropertiesFor(_user.Key)
+      .then(result => {
+        console.log(result);
+        resolve(true);
       })
-      .then(res => {
-        console.log(res);
-        resolve(res)
-      })
-      .catch(err => reject(err));
+      .catch(error => reject(error));
     });
   }
 
@@ -94,15 +101,18 @@ class Server implements IServer{
       // approver status
       // vars
       // const isUserApproverOne = await this.getApproverOne(profile.Email);
+      // approver data
+      const _userRoles = await this.getUserRoles(profile.Email as string);
 
 
       // return
       return {
         id: user ? user.Id : 0,
-        email: profile.Email,
+        email: profile.Email as string,
         displayName: profile.DisplayName,
         manager: manager,
         jobTitle: profile.Title,
+        ..._userRoles
       };
     } catch (error) {
       console.log(error);
@@ -112,6 +122,42 @@ class Server implements IServer{
       throw new Error("error");
     }
 
+  }
+
+  public getUserDetailsByEmail = async (email: string): Promise<[boolean, profileDetail| undefined, Error|undefined]> => {
+
+    const arrList = await this.fetch.profiles.clientPeoplePickerSearchUser({
+      AllowEmailAddresses: true,
+      AllowMultipleEntities: false,
+      MaximumEntitySuggestions: 1,
+      QueryString: email
+    });
+
+    const _user = arrList[0];
+
+    return new Promise((resolve, reject) => {
+      // vars
+      let error: Error | undefined;
+      if(_user) {
+        this.fetch.profiles.getPropertiesFor(_user.Key)
+        .then(result => {
+          // remove query? from picture url
+          const _url = result.PictureUrl as string;
+          const newUrl = _url.split("?")[0];
+          resolve([
+            true,
+            {
+              name: result.DisplayName as string,
+              imageUrl: newUrl
+            },
+            error
+          ]);
+        })
+        .catch(error => resolve([false, undefined, error]));
+      } else {
+        resolve([false, undefined, new Error("Error getting user")]);
+      }
+    });
   }
 
   public getListItemById = async (id: number): Promise<ISharepointFullFormData> => {
@@ -196,6 +242,64 @@ class Server implements IServer{
     return approveObj;
   }
 
+  public getApproverByOffice = async (office: string): Promise<ISharepointOfficeApproverData> => {
+
+    return new Promise((resolve, reject) => {
+      this.fetch.web.lists.getByTitle("HR-Locals")
+        .items.select().filter(`office eq '` + office + "'")
+        .get()
+        .then((result: ISharepointOfficeApproverData[]) => {
+          // one item mostlikely
+          if (result.length > 0) {
+            resolve(result[0]);
+          } else {
+            reject( new Error("No Approver for location set"));
+          }
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  }
+  
+  public getApproverByEmail = async (email: string): Promise<ISharepointOfficeApproverData | boolean> => {
+
+    return new Promise((resolve, reject) => {
+      this.fetch.web.lists.getByTitle("HR-Locals")
+        .items.select().filter(`email eq '` + email + "'")
+        .get()
+        .then((result: ISharepointOfficeApproverData[]) => {
+          // one item mostlikely
+          if (result.length > 0) {
+            resolve(result[0]);
+          } else {
+            resolve(false);
+          }
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  } 
+
+  public getSharepointApprovers = async (office: "dcp" | "others"): Promise<ISharepointApprovers> => {
+
+    const fetchString = office === "dcp" ? "DCP-Approvers" : "Other-Approvers";
+
+    return new Promise((resolve, reject) => {
+      this.fetch.web.lists.getByTitle("HR-Locals")
+        .items.select().filter(`office eq '` + fetchString + "'")
+        .get()
+        .then(result => {
+          const _str: string = result[0]["data"];
+          resolve(JSON.parse(_str));
+        })
+        .catch(error => {console.log(error)});
+    
+    });
+
+  }
+
   public doesUserExist = async (username: string): Promise<boolean> => {
 
     return new Promise((resolve, reject) => {
@@ -216,31 +320,40 @@ class Server implements IServer{
   }
 
   public approveRejectEntry =
-    async (id: number, page: mainPageView, status: approvalStatus): Promise<boolean> => {
-
-    return new Promise((resolve, reject) => {
-      // get date
-      // const _date = new Date();
+    async (id: number, page: mainPageView, status: approvalStatus, comment: string): Promise<boolean> => {
+      
       // obj to update
       const updateObj:ISharepointApprovalData = {};
+
+      // get date
+      const _date = new Date();
       // mutate obj
       switch(page) {
-        case "approval1":
+        case "Approver1":
           updateObj["Approver1Status"] = status;
+          updateObj["Approver1Query"] = comment;
+          updateObj["Approver1Date"] = _date;
           break;
-        case "approval2":
+        case "Approver2":
           updateObj["Approver2Status"] = status;
+          updateObj["Approver2Query"] = comment;
+          updateObj["Approver2Date"] = _date;
           break;
-        case "approval3":
+        case "Approver3":
           updateObj["Approver3Status"] = status;
+          updateObj["Approver3Query"] = comment;
+          updateObj["Approver3Date"] = _date;
           break;
-        case "approval4":
+        case "Approver4":
           updateObj["Approver4Status"] = status;
+          updateObj["Approver4Query"] = comment;
+          updateObj["Approver4Date"] = _date;
           break;
         default:
           break;
       }
-
+    return new Promise((resolve, reject) => {
+      // switch if dcp?
       this.adCreateList.items.getById(id).update(updateObj)
         .then(_ => {
           resolve(true);
@@ -251,20 +364,46 @@ class Server implements IServer{
     });
   }
 
-  public createRequest = async ( data: IFullFormData, email: string|undefined): Promise<boolean> => {
+  public approverStatusCheck = (id: number, status: approvalStatus, approver: approvalIndex): Promise<boolean> => {
+
+    return new Promise((resolve, reject) => {
+      this.adCreateList.items.getById(id).get()
+      .then((result:ISharepointFullFormData) => {
+        resolve(result[`${approver}Status` as keysOfSharepointData]  === status)
+      })
+      .catch(error => {
+        reject(false);
+      });
+    });
+  }
+
+  public createRequest = async (data: IFullFormData, email: string|undefined): Promise<boolean> => {
 
     const userExist = await this.doesUserExist(`${data.firstName}.${data.lastName}`);
+    // get location approvers
+    let approvers = {};
+
+    if (data.sbu.toLowerCase().includes("dcp")) {
+      approvers = await this.getSharepointApprovers("dcp");
+    } else {
+      approvers = await this.getSharepointApprovers("others");
+    }
 
     return new Promise((resolve, reject) => {
       // undef check
       if (email === undefined) {
         reject(new Error("Email not available"));
       }
-
+      // approver is missing
+      if (data.approver1 === "" || data.approver1 === undefined) {
+        reject(new Error("Approver for the selected office is missing, kindly refresh or contact IT"));
+      }
+      // does user exist
       if (userExist) {
         reject(new Error(`User ${data.firstName}.${data.lastName} already exists`));
       }
 
+      
       // create
       this.adCreateList.items.add({
         Title: data.title,
@@ -272,13 +411,14 @@ class Server implements IServer{
         LastName: data.lastName,
         Initials: data.initials,
         PrivateEmail: data.privateEmail,
-        PrivateNumber: data.privateNumber,
+        WorkNumber: data.workNumber,
         MobileNumber: data.mobileNumber,
         Address: data.address,
         City: data.city,
         Country: data.country,
         JobTitle: data.jobTitle,
-        Office: data.sbu,
+        Office: data.office,
+        Sbu: data.sbu,
         Department: data.department,
         SupervisorEmail: data.supervisorEmail,
         DangoteEmail: data.dangoteEmail,
@@ -288,7 +428,10 @@ class Server implements IServer{
         BusinessJustification: data.businessJustification,
         StaffReplaced: data.staffReplaced,
         Hardware: data.hardware,
-        creatorEmail: email
+        creatorEmail: email,
+        Approver1: data.approver1,
+        ...approvers,
+        isDcp: data.sbu.toLowerCase().includes("dcp") ? "Yes" : "No"
       })
       .then(_ => resolve(true))
       .catch(error => {
@@ -296,6 +439,50 @@ class Server implements IServer{
           reject(error);
         }
       });
+    });
+  }
+
+  public updateRequest = async (data: IFullFormData, email: string|undefined): Promise<boolean> => {
+
+    return new Promise((resolve, reject) => {
+      // email check
+      if (email === undefined) {
+        reject(new Error("Email not available"));
+      }
+
+      if (email !== data.creatorEmail) {
+        reject(new Error("User isn't creator"));
+      }
+      if (data.id) {
+        this.adCreateList.items.getById(data.id).update({
+          Title: data.title,
+          FirstName: data.firstName,
+          LastName: data.lastName,
+          Initials: data.initials,
+          PrivateEmail: data.privateEmail,
+          WorkNumber: data.workNumber,
+          MobileNumber: data.mobileNumber,
+          Address: data.address,
+          City: data.city,
+          Country: data.country,
+          JobTitle: data.jobTitle,
+          Office: data.office,
+          Sbu: data.sbu,
+          Department: data.department,
+          SupervisorEmail: data.supervisorEmail,
+          DangoteEmail: data.dangoteEmail,
+          DirectReports: data.directReports,
+          SalaryGrade: data.salaryLevel,
+          SalaryStep: data.salaryStep,
+          BusinessJustification: data.businessJustification,
+          StaffReplaced: data.staffReplaced,
+          Hardware: data.hardware,
+        })
+        .then(result => {resolve(true)})
+        .catch(error => reject(error));
+      } else {
+        reject(new Error("ID is missing"));
+      }
     });
   }
 
@@ -320,6 +507,31 @@ class Server implements IServer{
         .then(_ => resolve(true))
         .catch(error => reject(error));
     });
+  }
+
+  private getUserRoles = async (email: string): Promise<IUserApproverData> => {
+
+    let _userRole: "user" | "approver" = "user"; 
+    // get approvers
+    const isUserApproverOne = await this.getApproverByEmail(email);
+    const dcpApprovers = await this.getSharepointApprovers("dcp");
+    const otherApprovers = await this.getSharepointApprovers("others");
+
+    if (Object.values(dcpApprovers).includes(email) || Object.values(otherApprovers).includes(email)) {
+      _userRole = "approver"
+    }
+
+    const _userApproveObj = {
+      role: _userRole,
+      isUserApproverOne: isUserApproverOne ? true : false,
+      isUserApproverTwo: dcpApprovers.Approver2 === email || otherApprovers.Approver2 === email,
+      isUserApproverThree: dcpApprovers.Approver3 === email || otherApprovers.Approver3 === email,
+      isUserApproverFour: dcpApprovers.Approver4 === email || otherApprovers.Approver4 === email,
+    }
+
+    // check if user approvers
+    // return results
+    return _userApproveObj;
   }
 }
 
