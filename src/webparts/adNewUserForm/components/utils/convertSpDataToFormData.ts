@@ -27,7 +27,7 @@ export default (spData: ISharepointFullFormData): IFullFormData => {
     sbu: spData.Sbu,
     department: spData.Department,
     supervisorEmail: spData.SupervisorEmail,
-    dangoteEmail: spData.DangoteEmail,
+    dangoteEmail: spData.DangoteEmail ? spData.DangoteEmail : "",
     directReports: spData.DirectReports,
     salaryLevel: spData.SalaryGrade,
     salaryStep: spData.SalaryStep,

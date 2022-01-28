@@ -366,15 +366,18 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
 
   if (addressQuery && formSetting.mode === "new") {
     console.log("address quer");
-    setDialog({
-      show: true,
-      msg: "Load query data?",
-      onAccept: handleSetQuery,
-      onClose: () => {
-        // change url to remove query
-        window.history.replaceState(null, "", window.location.href.split("?")[0]);
-      }
-    });
+
+    handleSetQuery();
+    
+    // setDialog({
+    //   show: true,
+    //   msg: "Load query data?",
+    //   onAccept: handleSetQuery,
+    //   onClose: () => {
+    //     // change url to remove query
+    //     window.history.replaceState(null, "", window.location.href.split("?")[0]);
+    //   }
+    // });
   }
  
 

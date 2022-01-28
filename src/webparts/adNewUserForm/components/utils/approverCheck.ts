@@ -54,7 +54,7 @@ export const hasPrevUserApproved = (item: IFullFormData, currentApprover: mainPa
       if (item.office.includes("DCP")) {
         isApproved =  item.approver3Status === "Approved";
       } else {
-        isApproved =  item.approver3Status === "NotAllowed";
+        isApproved =  item.approver2Status === "NotAllowed";
       }
       break;
       
@@ -63,4 +63,15 @@ export const hasPrevUserApproved = (item: IFullFormData, currentApprover: mainPa
   }
 
   return isApproved;
+};
+
+export const hasItemBeenQueried = (item: IFullFormData): boolean => {
+  // default incase error
+  let queried = false;
+
+  if (Object.values(item).includes("Queried")) {
+    queried = true
+  }
+
+  return queried;
 };

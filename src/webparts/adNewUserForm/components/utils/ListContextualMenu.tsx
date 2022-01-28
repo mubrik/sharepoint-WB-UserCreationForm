@@ -3,7 +3,7 @@ import * as React from "react";
 import { IconButton,  } from "office-ui-fabric-react";
 // types
 import { ISharepointFullFormData, approvalStatus,
-  mainPageView, IFullFormData
+  mainPageView, IFullFormData, keysOfFullFormData
 } from "../../types/custom";
 // hooks
 import { useUserData } from "../userContext/UserContext";
@@ -11,7 +11,10 @@ import { useNotification } from "../notification/NotificationBarContext";
 import { useDialog } from "../dialog/DialogContext";
 // server
 import fetchServer from "../../controller/server";
-import { hasNextUserApproved, hasPrevUserApproved } from "./approverCheck";
+import { 
+  hasNextUserApproved, hasPrevUserApproved,
+  hasItemBeenQueried
+} from "./approverCheck";
 
 interface IComponentProps {
   data: IFullFormData;
@@ -59,7 +62,6 @@ export default ({data, handleView, onApproval,
   // handler
   const handleApprovalAction = (id: number, param: approvalStatus, comment: string): void => {
     // call server
-    console.log(id, param, comment);
     if (approverType) {
       // next Approver approved, trying to reject or pend
       if (param !== "Approved" && hasNextUserApproved(data, approverType)) {
@@ -71,8 +73,13 @@ export default ({data, handleView, onApproval,
         notify({show: true, isError: true, msg:"This item has not been approved by previous Approver"});
         return;
       }
+
+      // get current comment, typescript complains because mainpageview is more than approvers but this action only performed on approvers page, so safe
+      const _comment = data[`${approverType.toLowerCase()}Query` as keysOfFullFormData] as string;
+      // add a parameter to use to split prev from new text
+      const newcomment = _comment + "^^" + comment;
       // if not approve
-      fetchServer.approveRejectEntry(id, approverType, param, comment)
+      fetchServer.approveRejectEntry(id, approverType, param, newcomment)
       .then(_ => {
         notify({show: true, isError: false, msg:"Item status updated"});
       })
@@ -80,7 +87,7 @@ export default ({data, handleView, onApproval,
         if (error instanceof Error)
         notify({
           show: true, isError: true,
-          msg: error.message ? error.message : "Error Approving Item", 
+          msg: error.message ? error.message : "Error Approving Item",
           errorObj: error
         });
       })
@@ -102,45 +109,47 @@ export default ({data, handleView, onApproval,
         onClick: () => handleView(data.id as number)
       }
     ];
+
     // add aproval options
-    if (isUserAnApprover && enableApproval && email === data.creatorEmail) {
+    // if user is an approver, approving enabled and item has been queried(can only be done from mail/teams flow if option never enables)
+    if (isUserAnApprover && enableApproval && hasItemBeenQueried(data) && !itemIsRejected) {
       baseMenu.push(...[
         {
           key: 'approved',
-          name: 'Approved',
+          name: 'Approve',
           onClick: () => {
             setDialog({
               show: true,
               type: "approve",
               msg: "Confirm Approval",
               buttonText: "Approve",
-              onApprove: (param) => handleApprovalAction(data.id as number, "Approved", param),
+              onApprove: (comment) => handleApprovalAction(data.id as number, "Approved", comment),
             });
           }
         },
         {
           key: 'queried',
-          name: 'Queried',
+          name: 'Query',
           onClick: () => {
             setDialog({
               show: true,
               type: "approve",
               msg: "Confirm Query and Comment",
               buttonText: "Queried",
-              onApprove: (param) => handleApprovalAction(data.id as number, "Queried", param),
+              onApprove: (comment) => handleApprovalAction(data.id as number, "Queried", comment),
             });
           }
         },
         {
           key: 'rejected',
-          name: 'Rejected',
+          name: 'Reject',
           onClick: () => {
             setDialog({
               show: true,
               type: "approve",
               msg: "Confirm Rejection",
               buttonText: "Rejected",
-              onApprove: (param) => handleApprovalAction(data.id as number, "Rejected", param),
+              onApprove: (comment) => handleApprovalAction(data.id as number, "Rejected", comment),
             });
           }
         },
@@ -148,18 +157,19 @@ export default ({data, handleView, onApproval,
     }
 
     // add edit opt
-    if (itemIsRejected && handleEdit) {
-      baseMenu.push(
-        {
-          key: 'edit',
-          name: 'Edit',
-          onClick: () => handleEdit(data.id as number)
-        },
-      );
-    }
+    // add feature later on query
+    // if (itemIsRejected && handleEdit) {
+    //   baseMenu.push(
+    //     {
+    //       key: 'edit',
+    //       name: 'Edit',
+    //       onClick: () => handleEdit(data.id as number)
+    //     },
+    //   );
+    // }
 
     return baseMenu;
-  }, [isUserAnApprover, itemIsRejected, email]);
+  }, [isUserAnApprover, itemIsRejected, data]);
 
 
   return(

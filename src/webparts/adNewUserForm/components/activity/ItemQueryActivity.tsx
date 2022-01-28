@@ -11,6 +11,7 @@ import {
 } from "../../types/custom";
 // server
 import fetchServer from "../../controller/server";
+import { escape } from "@microsoft/sp-lodash-subset";
 
 const classes = mergeStyleSets({
   body: {
@@ -141,7 +142,7 @@ const ItemActivity = ({ email, comments, time }:IProps): JSX.Element => {
        <ActivityItem
           activityDescription={<Text variant={"smallPlus"}> {approver?.name} commented </Text>}
           activityPersonas={approver ? [approver] : undefined}
-          comments={<Text variant={"mediumPlus"}> {comments} </Text>}
+          comments={comments?.split("^^").map(split => <div style={{margin: "2px"}}> {split} </div>)}
           timeStamp={<Text variant={"small"}> {time?.toLocaleString()} </Text>}
           styles={{
             commentText: {
