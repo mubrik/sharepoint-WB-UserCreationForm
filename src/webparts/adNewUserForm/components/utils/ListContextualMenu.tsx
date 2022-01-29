@@ -173,17 +173,20 @@ export default ({data, handleView, onApproval,
         );
     }
 
-    // add edit opt
-    // add feature later on query
-    // if (itemIsRejected && handleEdit) {
-    //   baseMenu.push(
-    //     {
-    //       key: 'edit',
-    //       name: 'Edit',
-    //       onClick: () => handleEdit(data.id as number)
-    //     },
-    //   );
-    // }
+    // add edit feature?
+    // if user === creator && item queried && not rejected && processor == app
+    if (email === data.creatorEmail 
+      && !itemIsRejected && hasItemBeenQueried(data)
+      && data.processor === "application" && handleEdit
+      ) {
+      baseMenu.push(
+        {
+          key: 'edit',
+          name: 'Edit',
+          onClick: () => handleEdit(data.id as number)
+        },
+      );
+    }
 
     return baseMenu;
   }, [isUserAnApprover, itemIsRejected, data]);

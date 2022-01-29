@@ -141,7 +141,7 @@ const SingleApprover = ({ email, status, date }: ISingleApproverProps): JSX.Elem
         });
       }
     })
-  }, []);
+  }, [email]);
 
   return(
     <>

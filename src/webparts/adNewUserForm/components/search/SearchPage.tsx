@@ -67,7 +67,6 @@ export default ({setFormSetting, setMainPageState}: IComponentProps): JSX.Elemen
 
   }, [officeOption]);
 
-
   // handler for contx menu
   const handleViewClick = (id: number): void => {
     // set form setting

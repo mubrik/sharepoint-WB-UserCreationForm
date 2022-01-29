@@ -459,26 +459,27 @@ class Server implements IServer{
           PrivateEmail: data.privateEmail,
           WorkNumber: data.workNumber,
           MobileNumber: data.mobileNumber,
-          Address: data.address,
           City: data.city,
           Country: data.country,
-          JobTitle: data.jobTitle,
-          Office: data.office,
-          Sbu: data.sbu,
-          Department: data.department,
+          Address: data.address,
+          Comment: data.comment,
+          BusinessJustification: data.businessJustification,
           SupervisorEmail: data.supervisorEmail,
+          JobTitle: data.jobTitle,
+          StaffReplaced: data.staffReplaced,
+          Department: data.department,
           DangoteEmail: data.dangoteEmail,
+          Sbu: data.sbu,
+          Office: data.office,
           DirectReports: data.directReports,
           SalaryGrade: data.salaryLevel,
           SalaryStep: data.salaryStep,
-          BusinessJustification: data.businessJustification,
-          StaffReplaced: data.staffReplaced,
           Hardware: data.hardware,
         })
         .then(result => {resolve(true);})
         .catch(error => reject(error));
       } else {
-        reject(new Error("ID is missing"));
+        reject(new Error("ID is missing, try again or contact IT"));
       }
     });
   }

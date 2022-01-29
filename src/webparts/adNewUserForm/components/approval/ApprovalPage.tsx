@@ -238,7 +238,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
         render: ((item: IFullFormData) => <Text variant={"small"}> {item.creatorEmail?.split("@")[0]} </Text>),
         minWidth: 60
       },
-      { name: "processor", displayName: "Processor", isResizable: true, minWidth:60, maxWidth: 90 },
+      { name: "processor", displayName: "Processor", sorting: true, isResizable: true, minWidth:60, maxWidth: 90 },
       { name: "", sorting: false, maxWidth: 15, minWidth: 10, 
         render: (item: IFullFormData) => 
         <ListContextualMenu 

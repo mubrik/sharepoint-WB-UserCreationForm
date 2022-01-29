@@ -196,7 +196,8 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
             <StackItem grow={2}>
               <ReadonlyDropdown
                 label="SBU"
-                disabled={_disabled}
+                // specifically making sbu && office disabled for edit
+                disabled={formSetting.mode === "edit" || _disabled}
                 required={_required}
                 selectedKey={formData.sbu ? formData.sbu : undefined}
                 options={locationOpts}
@@ -206,7 +207,7 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
             <StackItem grow={2}>
               <ReadonlyDropdown
                 label="Office"
-                disabled={_disabled}
+                disabled={formSetting.mode === "edit" || _disabled}
                 required={_required}
                 selectedKey={formData.office ? formData.office : undefined}
                 options={

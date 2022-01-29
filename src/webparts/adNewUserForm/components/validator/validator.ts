@@ -13,7 +13,12 @@ export default ( param: IFullFormData ): [boolean, boolean, string] => {
   // data prop we dont really care much about
   const excludeProps = [
     "initials", "staffReplaced", "dangoteEmail",
-    "comment", "hardware", "privateNumber", "approver1"
+    "comment", "hardware", "privateNumber", "approver1",
+    "approver1Query","approver1Status", "approver1Date", "approver2",
+    "approver2Query","approver2Status", "approver2Date", "approver3",
+    "approver3Query","approver3Status", "approver3Date", "approver4",
+    "approver4Query","approver4Status", "approver4Date", "isDcp",
+    "processor"
   ];
 
   // loop props to check empty

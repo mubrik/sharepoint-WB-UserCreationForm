@@ -17,10 +17,14 @@ interface IComponentProps {
 // memo compare func
 const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) => {
 
-  const { dataString: prevString } = prevProps;
-  const { dataString: nextString } = nextProps;
+  const { dataString: prevString, disabled: prevDisabled } = prevProps;
+  const { dataString: nextString, disabled: nextDisabled } = nextProps;
 
   if (prevString !== nextString) {
+    return false;
+  }
+  
+  if (prevDisabled !== nextDisabled) {
     return false;
   }
 

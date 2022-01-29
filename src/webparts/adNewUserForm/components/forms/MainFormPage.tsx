@@ -176,23 +176,6 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
 
   // }, [formData.office]);
 
-  // effect to chech user approval status
-  // React.useEffect(() => {
-  //   if ((formSetting.mode === "readOnly") && formData.id ) {
-  //     // approval
-  //     const _approval = (formData.approver1 === email) ? "approval1" : 
-  //     (formData.approver2 === email) ? "approval2" :
-  //     (formData.approver3 === email) ? "approval3" :
-  //     (formData.approver4 === email) ? "approval4" : undefined;
-
-  //   if (_approval) {
-  //     setApproval(_approval);
-  //     setFormSetting(prevValue => ({...prevValue, mode: "approval"}));
-  //   }
-
-  //   }
-  // }, [formSetting.mode, formData.id]);
-
   // handler for all sub comp, strict TS but i think i know what i'm doing lol
   // memoised cause will be passed down 
   const handleInputChange = React.useCallback(
@@ -304,6 +287,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     .then(() => {
       notify({show: true, msg: "Request Updated", errorObj: null});
       // reset form, un comment when not testing
+      // set mode to new?
       // setFormIsTouched(false);
       // setFormData(initialMainFormData);
     })
