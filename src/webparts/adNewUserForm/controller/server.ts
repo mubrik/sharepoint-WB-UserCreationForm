@@ -153,7 +153,7 @@ class Server implements IServer{
             error
           ]);
         })
-        .catch(error => resolve([false, undefined, error]));
+        .catch(err => resolve([false, undefined, err]));
       } else {
         resolve([false, undefined, new Error("Error getting user")]);
       }
@@ -177,12 +177,11 @@ class Server implements IServer{
       .filter(`Office eq '` + sbu + "'")
       .get()
       .then(result => {
-        console.log(result);
         resolve(result);
       })
       .catch(error => {
         // just resolve false for now
-        reject(error);
+        reject(new Error("Error getting items for that sbu, try again"));
       });
     });
   }
@@ -232,7 +231,7 @@ class Server implements IServer{
       isUserApproverTwo: false,
       isUserApproverThree: false,
       isUserApproverFour: false,
-    }
+    };
     // check approval, mutate obj
     approveObj.isUserApproverOne =  await this.getApprover(username, "Approver1");
     approveObj.isUserApproverTwo =  await this.getApprover(username, "Approver2");
@@ -294,10 +293,8 @@ class Server implements IServer{
           const _str: string = result[0]["data"];
           resolve(JSON.parse(_str));
         })
-        .catch(error => {console.log(error)});
-    
+        .catch(error => {console.log(error);});
     });
-
   }
 
   public doesUserExist = async (username: string): Promise<boolean> => {
@@ -478,7 +475,7 @@ class Server implements IServer{
           StaffReplaced: data.staffReplaced,
           Hardware: data.hardware,
         })
-        .then(result => {resolve(true)})
+        .then(result => {resolve(true);})
         .catch(error => reject(error));
       } else {
         reject(new Error("ID is missing"));
@@ -518,7 +515,7 @@ class Server implements IServer{
     const otherApprovers = await this.getSharepointApprovers("others");
 
     if (Object.values(dcpApprovers).includes(email) || Object.values(otherApprovers).includes(email)) {
-      _userRole = "approver"
+      _userRole = "approver";
     }
 
     const _userApproveObj = {
@@ -527,7 +524,7 @@ class Server implements IServer{
       isUserApproverTwo: dcpApprovers.Approver2 === email || otherApprovers.Approver2 === email,
       isUserApproverThree: dcpApprovers.Approver3 === email || otherApprovers.Approver3 === email,
       isUserApproverFour: dcpApprovers.Approver4 === email || otherApprovers.Approver4 === email,
-    }
+    };
 
     // check if user approvers
     // return results

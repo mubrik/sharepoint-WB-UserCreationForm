@@ -112,7 +112,9 @@ export default ({data, handleView, onApproval,
 
     // add aproval options
     // if user is an approver, approving enabled and item has been queried(can only be done from mail/teams flow if option never enables)
-    if (isUserAnApprover && enableApproval && hasItemBeenQueried(data) && !itemIsRejected) {
+    if (isUserAnApprover && enableApproval && 
+        hasItemBeenQueried(data) && !itemIsRejected
+      ) {
       baseMenu.push(...[
         {
           key: 'approved',
@@ -154,6 +156,21 @@ export default ({data, handleView, onApproval,
           }
         },
       ]);
+    }
+
+    // notify feature? after an edit?
+    // if user === creator && item qqueried && not rejected && processor === app
+    if (email === data.creatorEmail 
+        && !itemIsRejected && hasItemBeenQueried(data)
+        && data.processor === "application"
+      ) {
+        baseMenu.push(
+          {
+            key: 'notify',
+            name: 'Notify Query',
+            onClick: () => console.log("Implement me")
+          }
+        );
     }
 
     // add edit opt

@@ -50,7 +50,8 @@ export default (spData: ISharepointFullFormData): IFullFormData => {
     approver4Status: spData.Approver4Status,
     approver4Query: spData.Approver4Query ? spData.Approver4Query : "",
     approver4Date: spData.Approver4Date ? new Date(spData.Approver4Date) : new Date("01/01/1990"),
-    isDcp: spData.isDcp
+    isDcp: spData.isDcp,
+    processor: spData.processor
   };
 
   return formData;

@@ -4,7 +4,7 @@ import * as React from "react";
 import { 
   Stack, Dropdown, 
   StackItem, IDropdownOption,
-  Spinner, Label, SelectionMode
+  Spinner, Text, SelectionMode
 } from "office-ui-fabric-react";
 import { ListView, 
   IViewField,
@@ -24,6 +24,8 @@ import {
 import fetchServer from "../../controller/server";
 // custom
 import ListContextualMenu from "../utils/ListContextualMenu";
+// notify
+import { useNotification } from "../notification/NotificationBarContext";
 // utils
 import convertSpDataToFormData from "../utils/convertSpDataToFormData";
 
@@ -38,6 +40,8 @@ export default ({setFormSetting, setMainPageState}: IComponentProps): JSX.Elemen
   const [officeOption, setOfficeOption] = React.useState<IDropdownOption | undefined>(undefined);
   const [isLoading, setIsLoading] = React.useState(false);
   const [filterList, setFilterList] = React.useState<IFullFormData[]>([]);
+  // notification
+  const notify = useNotification();
 
   // fetch effect
   React.useEffect(() => {
@@ -48,7 +52,15 @@ export default ({setFormSetting, setMainPageState}: IComponentProps): JSX.Elemen
         setFilterList(result.map(item => convertSpDataToFormData(item)));
       })
       .catch(error => {
-        console.log(error);
+        if (error instanceof Error) {
+          notify({
+            show: true,
+            msg: error.message ? error.message : "Error Getting Item, Try Again",
+            errorObj: error,
+            isError: true,
+            type: "error"
+          });
+        }
       })
       .finally(() => setIsLoading(false));
     }
@@ -79,7 +91,11 @@ export default ({setFormSetting, setMainPageState}: IComponentProps): JSX.Elemen
 
   const viewFields: IViewField[] = React.useMemo(() => {
     return [
-      { name: "creatorEmail", displayName: "Creator", sorting: true, isResizable: true, maxWidth: 150 },
+      { name: "creatorEmail", displayName: "Creator", sorting: true, isResizable: true, maxWidth: 120,
+        render: ((item: IFullFormData) => <Text variant={"small"}> {item.creatorEmail?.split("@")[0]} </Text>),
+        minWidth: 60
+      },
+      { name: "processor", displayName: "Processor", isResizable: true, minWidth:60, maxWidth: 90 },
       { name: "", sorting: false, maxWidth: 20 , 
         render: (item: IFullFormData) => 
         <ListContextualMenu 
@@ -89,14 +105,22 @@ export default ({setFormSetting, setMainPageState}: IComponentProps): JSX.Elemen
           enableApproval={false}
         />
       },
-      { name: "firstName", displayName: "First Name", sorting: true, isResizable: true, maxWidth: 80 },
-      { name: "lastName", displayName: "Last Name", sorting: true, isResizable: true, maxWidth: 80 },
-      { name: "office",  displayName: "Office", sorting: true, isResizable: true, maxWidth: 80 },
-      { name: "department",  displayName: "Department", isResizable: true, maxWidth: 80},
-      { name: "approver1Status", displayName: "SBU-HR", isResizable: true, maxWidth: 120 },
-      { name: "approver2Status", displayName: "HR", isResizable: true, maxWidth: 120 },
-      { name: "approver3Status", displayName: "IT", isResizable: true, maxWidth: 120 },
-      { name: "approver4Status", displayName: "GHIT", isResizable: true, maxWidth: 120 },
+      { name: "profile", displayName: "Profile", sorting: true, isResizable: true, maxWidth: 100,
+        render: (item: IFullFormData) => <Text variant={"small"}> {`${item.firstName}.${item.lastName}`} </Text>
+      },
+      { name: "office",  displayName: "Sbu", sorting: true, isResizable: true, maxWidth: 80 },
+      { name: "department",  displayName: "Dept", isResizable: true, maxWidth: 80},
+      { name: "approver1Status", displayName: "SBU HR", isResizable: true, minWidth: 70, maxWidth: 120 },
+      { name: "approver2Status", displayName: "HEAD HR", isResizable: true, minWidth: 70, maxWidth: 120 },
+      { name: "approver3Status", displayName: "IT", isResizable: true, minWidth: 70, maxWidth: 120,
+        render: (item: IFullFormData) => {
+          if (item.isDcp === "Yes") {
+            return <Text variant={"small"}> {item.approver3Status} </Text>;
+          }
+          return <Text variant={"small"}> </Text>;
+        }
+      },
+      { name: "approver4Status", displayName: "GHIT", isResizable: true, minWidth: 70, maxWidth: 120 },
     ];
   }, [officeOption, filterList]);
 

@@ -12,6 +12,7 @@ import type {
 // custom comp
 import ResponsiveTextField from "../utils/ResponsiveTextField";
 import PhoneInputField from "../utils/PhoneInputField";
+import ReadonlyDropdown from "../utils/ReadonlyDropdown";
 // query
 import { useMediaQuery } from "react-responsive";
 // utils
@@ -98,7 +99,7 @@ export default React.memo(
               horizontal={isWideScreen ? true : undefined}
             >
               <StackItem shrink align="start">
-                <Dropdown
+                <ReadonlyDropdown
                   label={"Title"}
                   required={_required}
                   disabled={_disabled}

@@ -14,6 +14,7 @@ import type { IFullFormData,
 import ResponsiveTextField from "../utils/ResponsiveTextField";
 import PeoplePickerComp from "../utils/PeoplePickerComp";
 import CustomMultiCheckBox from "../utils/CustomMultiCheckBox";
+import ReadonlyDropdown from "../utils/ReadonlyDropdown";
 // query
 import { useMediaQuery } from "react-responsive";
 // init data
@@ -114,7 +115,7 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
       </StackItem>
       <Stack tokens={{ childrenGap: 8 }}>
         <StackItem grow>
-          <Dropdown
+          <ReadonlyDropdown
             label="Business Justification"
             disabled={_disabled}
             selectedKey={formData.businessJustification}
@@ -193,7 +194,7 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
             horizontal={isWideScreen ? true : undefined}
           >
             <StackItem grow={2}>
-              <Dropdown
+              <ReadonlyDropdown
                 label="SBU"
                 disabled={_disabled}
                 required={_required}
@@ -203,7 +204,7 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
               />
             </StackItem>
             <StackItem grow={2}>
-              <Dropdown
+              <ReadonlyDropdown
                 label="Office"
                 disabled={_disabled}
                 required={_required}
@@ -214,7 +215,8 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
                   formData.sbu === "Dancom" ? dancomSbuOpts :
                   formData.sbu === "DCP" ? dcpSbuOpts :
                   formData.sbu === "DSR" ? dsrSbuOpts :
-                  formData.sbu === "Flour" ? dfmSbuOpts : otherSbuOpts
+                  formData.sbu === "Flour" ? dfmSbuOpts :
+                  formData.sbu === "Others" ? otherSbuOpts : []
                 }
                 onChange={(_, newValue) => setFormData("office", newValue?.text)}
               />
@@ -227,7 +229,7 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
             horizontal={isWideScreen ? true : undefined}
           >
             <StackItem grow>
-              <Dropdown
+              <ReadonlyDropdown
                 disabled={_disabled}
                 label="Salary Grade"
                 selectedKey={formData.salaryLevel}
@@ -236,7 +238,7 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
               />
             </StackItem>
             <StackItem grow>
-              <Dropdown
+              <ReadonlyDropdown
                 disabled={_disabled}
                 label="Salary Step"
                 selectedKey={formData.salaryStep}

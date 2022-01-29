@@ -11,7 +11,6 @@ import {
 } from "../../types/custom";
 // server
 import fetchServer from "../../controller/server";
-import { escape } from "@microsoft/sp-lodash-subset";
 
 const classes = mergeStyleSets({
   body: {
@@ -23,8 +22,9 @@ const classes = mergeStyleSets({
     marginBottom: "4px"
   },
   itemContainer: {
-    boxShadow: "#b774123d -1px 0px 3px 1px",
+    boxShadow: "rgb(0 0 0 / 15%) -1px 0px 4px 0px",
     padding: "6px",
+    border: "1px solid #6cc1eb47",
     borderRadius: "8px"
   },
   iconColor: {

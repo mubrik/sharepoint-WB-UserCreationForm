@@ -32,6 +32,7 @@ export interface IUserData extends IUserApproverData {
   manager?: string;
   jobTitle?: string;
 }
+
 export interface IServer {
   fetch: typeof sp;
   testing(): Promise<void>;
@@ -87,6 +88,7 @@ export interface IFullFormData extends IFormUserData,IFormBusinessData,IFormJust
   id? : number;
   creatorEmail?: string;
   isDcp?: "Yes" | "No";
+  processor?: "flow" | "application";
   approver1? : string;
   approver1Status?: approvalStatus;
   approver1Query?: string;
@@ -150,6 +152,7 @@ export interface ISharepointFullFormData {
   Approver4Query: string;
   Approver4Date: Date;
   isDcp: "Yes" | "No";
+  processor: "flow" | "application";
 }
 
 interface ISharepointApprovalData {
@@ -182,6 +185,7 @@ interface ISharepointApprovers {
   Approver3?: string;
   Approver4: string;
 }
+
 export interface IApproverObj {
   name: string;
   status: string;

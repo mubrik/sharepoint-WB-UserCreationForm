@@ -109,8 +109,8 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
 
   // testing
   React.useEffect(() => {
-    fetchServer.getSharepointApprovers("others")
-    .then(res => console.log(res));
+    // fetchServer.getSharepointApprovers("others")
+    // .then(res => console.log(res));
   }, []);
 
   // effect for validation notification
