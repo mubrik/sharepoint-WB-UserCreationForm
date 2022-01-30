@@ -64,11 +64,8 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
     "salaryLevel", "salaryStep", "businessJustification",
     "hardware", "staffReplaced", "office"
   ];
+  
   // compare
-  // layout first
-  if (prevProps.layout !== nextProps.layout) {
-    return false;
-  }
   // form mode
   if (prevProps.formSetting.mode !== nextProps.formSetting.mode) {
     return false;
@@ -90,7 +87,6 @@ interface IComponentProps {
   formData: IFullFormData;
   formSetting: formSettings;
   setFormData: <T extends keysOfFullFormData, A>(key: T, value: A) => void;
-  layout: "single" | "double";
 }
 
 // main component
@@ -259,16 +255,6 @@ export default React.memo(({formData, setFormData, formSetting}: IComponentProps
               grow
               tokens={{ childrenGap : 8}}
             >
-              {/* <StackItem grow>
-                <Dropdown
-                  label="SBU"
-                  disabled={_disabled}
-                  required={_required}
-                  selectedKey={formData.sbu ? formData.sbu : undefined}
-                  options={sbuOpts}
-                  onChange={(_, newValue) => setFormData("sbu", newValue?.text)}
-                />
-              </StackItem> */}
               <StackItem grow>
                 <ResponsiveTextField
                   readOnly={_readOnly}

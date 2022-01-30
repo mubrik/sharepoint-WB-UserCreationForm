@@ -27,8 +27,8 @@ interface IComponentProps {
   formData: IFullFormData;
   formSetting: formSettings;
   setFormData: <T extends keysOfFullFormData, A>(key: T, value: A) => void;
-  layout: "single" | "double";
 }
+
 // opttion list for title control
 const titleDropdownOpts = [
   {key: "Mr", text: "Mr"},
@@ -56,10 +56,6 @@ const arePropsEqual = (prevProps: IComponentProps, nextProps: IComponentProps) =
   // filter
   const prev = pick(prevProps.formData, userFormArr);
   // compare
-  // layout first
-  if (prevProps.layout !== nextProps.layout) {
-    return false;
-  }
   // form mode
   if (prevProps.formSetting.mode !== nextProps.formSetting.mode) {
     return false;

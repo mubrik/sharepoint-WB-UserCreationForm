@@ -89,9 +89,6 @@ const classes = mergeStyleSets({
 export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element => {
 
   console.log("render mainpage");
-  // layout state
-  const [layoutState, setLayoutState] = React.useState<paneLayoutState>("double");
-  // const [formIsValid, setFormIsValid] = React.useState(false);
   const [formIsLoading, setFormIsLoading] = React.useState(false);
   const [formIsTouched, setFormIsTouched] = React.useState(false);
   // controlled form data
@@ -137,31 +134,20 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     }
   }, [formSetting, email]);
 
-  // // effect for getting approver 1
-  // React.useEffect(() => {
+  // effect to handle loading id from query
+  React.useEffect(() => {
 
-  //   if (formData.office && (formSetting.mode === "new" || formSetting.mode === 'edit')) {
-  //     fetchServer.getApproverByOffice(formData.office)
-  //       .then(result => {
-  //         setFormData(prevValue => ({
-  //           ...prevValue,
-  //           approver1: result.email
-  //         }));
-  //       })
-  //       .catch(error => {
-  //         if (error instanceof Error) {
-  //           notify({
-  //             show: true, 
-  //             msg: error.message ? error.message : "Error Getting Approver, Try Again", 
-  //             errorObj: error, 
-  //             isError: true, 
-  //             type: "error"
-  //           });
-  //         }
-  //       });
-  //   }
-
-  // }, [formData.office]);
+    if (addressQuery) {
+      const [id, other] = addressQuery;
+      setFormSetting({
+        id: Number(id),
+        mode: "readOnly"
+      });
+      // change url to remove query
+      window.history.replaceState(null, "", window.location.href.split("?")[0]);
+    }
+    
+  }, [addressQuery]);
 
   // handler for all sub comp, strict TS but i think i know what i'm doing lol
   // memoised cause will be passed down 
@@ -322,34 +308,34 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   // };
 
   // handle load query
-  const handleSetQuery = (): void => {
+  // const handleSetQuery = (): void => {
 
-    if (addressQuery) {
-      const [id, other] = addressQuery;
-      setFormSetting({
-        id: Number(id),
-        mode: "readOnly"
-      });
-      // change url to remove query
-      window.history.replaceState(null, "", window.location.href.split("?")[0]);
-    }
-  };
+  //   if (addressQuery) {
+  //     const [id, other] = addressQuery;
+  //     setFormSetting({
+  //       id: Number(id),
+  //       mode: "readOnly"
+  //     });
+  //     // change url to remove query
+  //     window.history.replaceState(null, "", window.location.href.split("?")[0]);
+  //   }
+  // };
 
-  if (addressQuery && formSetting.mode === "new") {
-    console.log("address quer");
+  // if (addressQuery && formSetting.mode === "new") {
+  //   console.log("address quer");
 
-    handleSetQuery();
+  //   handleSetQuery();
     
-    // setDialog({
-    //   show: true,
-    //   msg: "Load query data?",
-    //   onAccept: handleSetQuery,
-    //   onClose: () => {
-    //     // change url to remove query
-    //     window.history.replaceState(null, "", window.location.href.split("?")[0]);
-    //   }
-    // });
-  }
+  //   // setDialog({
+  //   //   show: true,
+  //   //   msg: "Load query data?",
+  //   //   onAccept: handleSetQuery,
+  //   //   onClose: () => {
+  //   //     // change url to remove query
+  //   //     window.history.replaceState(null, "", window.location.href.split("?")[0]);
+  //   //   }
+  //   // });
+  // }
 
   return(
     <Stack tokens={{childrenGap : 8}}>
@@ -373,7 +359,6 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
             > 
               <StackItem grow>
                 <UserInfoForm
-                  layout={layoutState}
                   formData={formData}
                   formSetting={formSetting}
                   setFormData={handleInputChange}
@@ -384,7 +369,6 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
               </StackItem>
               <StackItem grow>
                 <BusinessInfoForm
-                  layout={layoutState}
                   formData={formData}
                   formSetting={formSetting}
                   setFormData={handleInputChange}

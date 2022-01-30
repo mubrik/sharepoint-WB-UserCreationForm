@@ -23,6 +23,9 @@ const ReadOnlyDropdown = ({disabled, selectedKey, label, ...rest}: IComponentPro
         readOnly={true}
         value={selectedKey ? selectedKey.toString() : ""}
         label={label}
+        style={{
+          cursor: "not-allowed"
+        }}
       />
     );
   }
