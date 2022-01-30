@@ -11,6 +11,7 @@ import { IFullFormData, keysOfFullFormData,
 } from "../../types/custom";
 // validator
 import validator from "../validator/validator";
+import { useValidateForm } from "../validator/validator";
 // custom comp
 import UserInfoForm from "./UserInfoForm";
 import BusinessInfoForm from "./BusinessInfoForm";
@@ -87,15 +88,17 @@ const classes = mergeStyleSets({
 
 export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element => {
 
+  console.log("render mainpage");
   // layout state
   const [layoutState, setLayoutState] = React.useState<paneLayoutState>("double");
-  const [formIsValid, setFormIsValid] = React.useState(false);
+  // const [formIsValid, setFormIsValid] = React.useState(false);
   const [formIsLoading, setFormIsLoading] = React.useState(false);
   const [formIsTouched, setFormIsTouched] = React.useState(false);
   // controlled form data
   // state changes causing a lot of mainpage re render, move to seperate comp and use context?
   const [formData, setFormData] = React.useState(initialMainFormData);
-  console.log("render mainpage");
+  // validation hook
+  const formIsValid = useValidateForm(formData, formSetting.mode, formIsTouched);
   // responsive
   const isMediumScreen = useMediaQuery({ maxWidth: 820 });
   // notify
@@ -112,22 +115,6 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     // fetchServer.getSharepointApprovers("others")
     // .then(res => console.log(res));
   }, []);
-
-  // effect for validation notification
-  React.useEffect(() => {
-    // only validate if form is touched
-    if (formIsTouched && (formSetting.mode === "new" || formSetting.mode === 'edit')) {
-      // validate
-      const [isValid, isError, msg] = validator(formData);
-      
-      if (isError) {
-        notify({msg: msg, isError: true, show: true, errorObj: null});
-      } else {
-        notify({msg: "", isError: false, show: false, errorObj: null});
-      }
-      setFormIsValid(isValid);
-    }
-  }, [formIsTouched, formData, formSetting]);
 
   // effect for fetching
   React.useEffect(() => {
@@ -363,7 +350,6 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
     //   }
     // });
   }
- 
 
   return(
     <Stack tokens={{childrenGap : 8}}>

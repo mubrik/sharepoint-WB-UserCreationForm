@@ -1,8 +1,11 @@
+import * as React from "react";
+import { IFullFormData } from "../../types/custom";
+// notify
+import { useNotification } from "../notification/NotificationBarContext";
+
 // techniclly not a component, just a function
 // basically takes the form data, runs a bunch of ifs check and returns and obj
-import { IFullFormData } from "../../types/custom";
-
-export default ( param: IFullFormData ): [boolean, boolean, string] => {
+const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
   // pure func
   const data = { ...param };
   // returned variables
@@ -82,6 +85,40 @@ export default ( param: IFullFormData ): [boolean, boolean, string] => {
   return [true, isError, errorMsg];
 };
 
+/**
+ * basically runs validatation on formdata and returns a boolean
+ * @param {IFullFormData, formMode, formIsTouched}
+ */
+export const useValidateForm = (
+  formData:IFullFormData,
+  formMode: "new" | "readOnly" | "approval" | "edit", 
+  formIsTouched: boolean 
+  ): boolean => {
+
+  const [validState, setValidState] = React.useState(false);
+
+  // hook for notification
+  const notify = useNotification();
+
+  // effect for validation notification
+  React.useEffect(() => {
+    // only validate if form is touched
+    if (formIsTouched && (formMode === "new" || formMode === 'edit')) {
+      // validate
+      const [isValid, isError, msg] = validator(formData);
+      
+      if (isError) {
+        notify({msg: msg, isError: true, show: true, errorObj: null});
+      } else {
+        notify({msg: "", isError: false, show: false, errorObj: null});
+      }
+      setValidState(isValid);
+    }
+  }, [formIsTouched, formData, formMode]);
+
+  return validState;
+};
+
 // other validator functions
 export const numberFieldValidator = (newValue: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -114,3 +151,5 @@ export const textFieldValidator = (newValue: string): Promise<string> => {
     }
   });
 };
+
+export default validator;
