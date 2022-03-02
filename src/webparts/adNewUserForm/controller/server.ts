@@ -98,9 +98,6 @@ class Server implements IServer{
         manager = managerProfile.Email;
       }
 
-      // approver status
-      // vars
-      // const isUserApproverOne = await this.getApproverOne(profile.Email);
       // approver data
       const _userRoles = await this.getUserRoles(profile.Email as string);
 
@@ -119,7 +116,7 @@ class Server implements IServer{
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error("error");
+      throw new Error("error getting user details");
     }
 
   }
@@ -293,7 +290,10 @@ class Server implements IServer{
           const _str: string = result[0]["data"];
           resolve(JSON.parse(_str));
         })
-        .catch(error => {console.log(error);});
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
     });
   }
 

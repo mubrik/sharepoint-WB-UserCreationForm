@@ -32,14 +32,13 @@ export default ({children}: IComponentProps): JSX.Element => {
         setUserData({
           ...result
         });
-        console.log("got user");
         return result.email;
       })
       .catch(error => {
         if (error instanceof Error && "message" in error) {
           notify({show: true, isError: true, msg: error.message, errorObj: error});
         }
-        notify({show: true, isError: true, msg:"Error getting user, Network?", errorObj: error});
+        notify({show: true, isError: true, msg:"Error getting user, Try refreshing", errorObj: error});
       });
     }
   }, []);

@@ -111,6 +111,9 @@ export default React.memo(
                   prefix="First Name"
                   value={formData.firstName}
                   onChange={(_, newValue) => setFormData("firstName", newValue as string)}
+                  onGetErrorMessage={textFieldValidator}
+                  validateOnLoad={false}
+                  validateOnFocusOut
                 />
               </StackItem>
               <StackItem grow={3}>

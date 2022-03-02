@@ -2,13 +2,14 @@
 import * as React from "react";
 import {
   Stack, Separator, Text,
-  StackItem, Label, FontIcon, 
-  Dialog, mergeStyleSets, PrimaryButton, DefaultButton
+  StackItem, FontIcon, mergeStyleSets
 } from "office-ui-fabric-react";
 // data
 import { IFullFormData, keysOfFullFormData,
-  formSettings, IApproverObj,
+  formSettings,
 } from "../../types/custom";
+// query
+import { useMediaQuery } from "react-responsive";
 // validator
 import validator from "../validator/validator";
 import { useValidateForm } from "../validator/validator";
@@ -23,14 +24,13 @@ import useAddressQuery from "../utils/useAddressQuery";
 import { useDialog } from "../dialog/DialogContext";
 import { useUserData } from "../userContext/UserContext";
 import { hasNextUserApproved, hasPrevUserApproved } from "../utils/approverCheck";
-// query
-import { useMediaQuery } from "react-responsive";
 // notification 
 import { useNotification } from "../notification/NotificationBarContext";
 // server
 import fetchServer from "../../controller/server";
 // utils
 import convertSpDataToFormData from "../utils/convertSpDataToFormData";
+import printDocument from "../utils/printDocument";
 
 // initial form data
 const initialMainFormData: IFullFormData  = {
@@ -153,6 +153,12 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   // memoised cause will be passed down 
   const handleInputChange = React.useCallback(
     <T extends keysOfFullFormData, A>( field:T, value: A) => {
+
+      // first check
+      // insert black panther we dont do that here.meme
+      if (typeof value === "undefined") {
+        return;
+      }
       // set touched
       setFormIsTouched(true);
       // some light editing
@@ -338,7 +344,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   // }
 
   return(
-    <Stack tokens={{childrenGap : 8}}>
+    <Stack tokens={{childrenGap : 8}} id="printable-document">
       <StackItem grow>
         <Stack tokens={{childrenGap : 8}} className={classes.body}>
           <StackItem grow>
@@ -465,6 +471,9 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
           <ItemQueryActivity data={formData}/>
         </StackItem>
       }
+      {/* <StackItem>
+        <PrimaryButton text={"testing"} onClick={() => printDocument("printable-document")}/>
+      </StackItem> */}
     </Stack>
   );
 };

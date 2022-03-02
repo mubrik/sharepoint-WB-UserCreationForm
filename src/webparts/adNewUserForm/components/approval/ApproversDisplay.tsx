@@ -183,7 +183,9 @@ const ItemStatus = ({ data }: IComponentProps): JSX.Element => {
         root: {
           color: "red"
         }}}
-      > This item has been Rejected by an Approver </Text>
+      > 
+        This item has been Rejected by an Approver
+      </Text>
     );
   }
 
@@ -195,19 +197,19 @@ const ItemStatus = ({ data }: IComponentProps): JSX.Element => {
         root: {
           color: "#673ab7"
         }}}
-      > This item has been Queried by an Approver  </Text>
+      > 
+        This item has been Queried by an Approver 
+      </Text>
     );
   }
 
   // pending
   if (Object.values(data).includes("Pending")) {
     return(
-      <Text
-        styles={{
-        root: {
-          color: "blue"
-        }}}
-      > This item is awaiting Approval </Text>
+      <Text style={{color: "blue"}} >
+        This item is awaiting Approval 
+        {data.processor === "application" ? " via the Application" : " via Mail" }
+      </Text>
     );
   }
 
