@@ -70,7 +70,7 @@ export const hasItemBeenQueried = (item: IFullFormData): boolean => {
   let queried = false;
 
   if (Object.values(item).includes("Queried")) {
-    queried = true
+    queried = true;
   }
 
   return queried;

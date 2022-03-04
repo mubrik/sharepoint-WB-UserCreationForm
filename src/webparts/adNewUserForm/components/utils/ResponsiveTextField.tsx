@@ -37,7 +37,7 @@ const arePropsEqual = (prevProps: ITextFieldProps, nextProps: ITextFieldProps) =
   }
 
   if (prevValue !== nextValue) {
-    return false
+    return false;
   }
 
   // finally, not comparing function

@@ -37,8 +37,13 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
   React.useEffect(() => {
     try {
       const bench = document.getElementById("workbenchPageContent");
+      const canvas = document.getElementsByClassName("CanvasZone--controlSelected")[0] as HTMLElement;
       if (bench) {
         bench.style.maxWidth = "1920px";
+      }
+      
+      if (canvas) {
+        canvas.style.maxWidth = "1920px";
       }
     } catch (error) {
       console.log(error);
@@ -83,7 +88,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
         {
           viewPage === "Approver1" &&
           <ApprovalPage
-            mainPageView={viewPage} 
+            mainPageViewState={viewPage} 
             setMainPageState={setViewPage}
             setFormSetting={setFormSetting}
           />
@@ -91,7 +96,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
         {
           viewPage === "Approver2" &&
           <ApprovalPage
-            mainPageView={viewPage} 
+            mainPageViewState={viewPage} 
             setMainPageState={setViewPage}
             setFormSetting={setFormSetting}
           />
@@ -99,7 +104,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
         {
           viewPage === "Approver3" &&
           <ApprovalPage
-            mainPageView={viewPage} 
+            mainPageViewState={viewPage} 
             setMainPageState={setViewPage}
             setFormSetting={setFormSetting}
           />
@@ -107,7 +112,7 @@ export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
         {
           viewPage === "Approver4" &&
           <ApprovalPage
-            mainPageView={viewPage} 
+            mainPageViewState={viewPage} 
             setMainPageState={setViewPage}
             setFormSetting={setFormSetting}
           />

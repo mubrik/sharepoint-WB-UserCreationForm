@@ -30,7 +30,7 @@ const initialState = {
 };
 
 const [useDialog, DialogProvider] =
-  createContext<React.Dispatch<React.SetStateAction<IDialogState>>>();
+createContext<React.Dispatch<React.SetStateAction<IDialogState>>>();
 
 export default ({ children }:IDialogProps) :JSX.Element => {
   // state
@@ -121,4 +121,4 @@ export default ({ children }:IDialogProps) :JSX.Element => {
   );
 };
 
-export { useDialog }
+export { useDialog };

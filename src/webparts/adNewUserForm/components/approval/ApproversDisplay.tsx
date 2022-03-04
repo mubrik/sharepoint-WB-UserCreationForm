@@ -140,7 +140,7 @@ const SingleApprover = ({ email, status, date }: ISingleApproverProps): JSX.Elem
           imageUrl: "",
         });
       }
-    })
+    });
   }, [email]);
 
   return(

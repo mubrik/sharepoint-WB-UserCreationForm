@@ -139,8 +139,9 @@ class Server implements IServer{
         this.fetch.profiles.getPropertiesFor(_user.Key)
         .then(result => {
           // remove query? from picture url
-          const _url = result.PictureUrl as string;
-          const newUrl = _url.split("?")[0];
+          console.log(result);
+          const _url: string | null = result.PictureUrl;
+          const newUrl = _url ? _url.split("?")[0] : result.DisplayName as string;
           resolve([
             true,
             {
@@ -366,7 +367,7 @@ class Server implements IServer{
     return new Promise((resolve, reject) => {
       this.adCreateList.items.getById(id).get()
       .then((result:ISharepointFullFormData) => {
-        resolve(result[`${approver}Status` as keysOfSharepointData]  === status)
+        resolve(result[`${approver}Status` as keysOfSharepointData]  === status);
       })
       .catch(error => {
         reject(false);
@@ -390,17 +391,19 @@ class Server implements IServer{
       // undef check
       if (email === undefined) {
         reject(new Error("Email not available"));
+        return;
       }
       // approver is missing
       if (data.approver1 === "" || data.approver1 === undefined) {
         reject(new Error("Approver for the selected office is missing, kindly refresh or contact IT"));
+        return;
       }
       // does user exist
-      if (userExist) {
-        reject(new Error(`User ${data.firstName}.${data.lastName} already exists`));
+      if (userExist && (data.initials === "" || data.initials === undefined)) {
+        reject(new Error(`User ${data.firstName}.${data.lastName} already exists, Include initials in form to proceed`));
+        return;
       }
 
-      
       // create
       this.adCreateList.items.add({
         Title: data.title,
@@ -445,11 +448,14 @@ class Server implements IServer{
       // email check
       if (email === undefined) {
         reject(new Error("Email not available"));
+        return;
       }
 
       if (email !== data.creatorEmail) {
         reject(new Error("User isn't creator"));
+        return;
       }
+
       if (data.id) {
         this.adCreateList.items.getById(data.id).update({
           Title: data.title,

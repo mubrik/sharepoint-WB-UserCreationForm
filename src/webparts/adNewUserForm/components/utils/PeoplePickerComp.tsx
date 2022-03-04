@@ -2,6 +2,7 @@
 // fluent got the same component but 3x more stressful to set up
 import * as React from "react";
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { TextField } from "office-ui-fabric-react";
 // context, needed for comp to work
 import { WebpartContext } from "../AdNewUserForm";
 // type
@@ -32,9 +33,21 @@ export default ({ formData, setFormData, disabled }:IComponentProps): JSX.Elemen
     }
   };
 
+  if (disabled) {
+    return(
+      <TextField
+        readOnly={true}
+        value={formData.supervisorEmail}
+        label={"Supervisor"}
+        style={{
+          cursor: "not-allowed"
+        }}
+      />
+    );
+  }
+
   return(
     <PeoplePicker
-      disabled={disabled ? disabled : false}
       required={true}
       context={webpartData?.context as any} // casting as any cause the types dont match but it works
       defaultSelectedUsers={formData.supervisorEmail === "" ? undefined : [formData.supervisorEmail]}

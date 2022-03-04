@@ -69,4 +69,4 @@ export default ({children}:INotificationBarProps) :JSX.Element => {
   );
 };
 
-export { useNotification }
+export { useNotification };

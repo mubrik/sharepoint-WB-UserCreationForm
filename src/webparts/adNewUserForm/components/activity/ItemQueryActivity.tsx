@@ -103,6 +103,7 @@ const ItemActivity = ({ email, comments, time }:IProps): JSX.Element => {
     fetchServer.getUserDetailsByEmail(email)
       .then(result => {
         const [ok, data, error] = result;
+        console.log(data);
 
         if (ok && data) {
           setApprover({

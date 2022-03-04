@@ -1,7 +1,7 @@
 import * as React from "react";
 // ui
 import {Stack, DefaultButton,
-  ContextualMenu, IContextualMenuProps,
+  IContextualMenuProps,
   mergeStyleSets, Nav, INavLinkGroup, StackItem,
   INavLink, SelectionMode,
   Text
@@ -17,10 +17,7 @@ import fetchServer from "../../controller/server";
 // types
 import { 
   IUserData, mainPageView,
-  ISharepointFullFormData,
-  keysOfSharepointData,
-  keysOfFullFormData,
-  approvalStatus, formSettings,
+  keysOfFullFormData, formSettings,
   approvalIndex, IFullFormData
 } from "../../types/custom";
 // query
@@ -31,13 +28,12 @@ import ListContextualMenu from "../utils/ListContextualMenu";
 import convertSpDataToFormData from "../utils/convertSpDataToFormData";
 
 
-
 interface ICompMainStateData {
   data: IFullFormData[] | undefined;
   status: "idle" | "loaded";
 }
 
-type viewPage = "Pending" | "Approved" | "Rejected" | "Queried" | "full";
+type viewPageType = "Pending" | "Approved" | "Rejected" | "Queried" | "full";
 
 // initial data
 const initialData: ICompMainStateData = {
@@ -58,17 +54,17 @@ const classes = mergeStyleSets({
 
 
 interface IComponentProps {
-  mainPageView: mainPageView;
+  mainPageViewState: mainPageView;
   setMainPageState: React.Dispatch<React.SetStateAction<mainPageView>>;
   setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
 }
 
-export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProps): JSX.Element => {
+export default ({ mainPageViewState, setMainPageState, setFormSetting}:IComponentProps): JSX.Element => {
   
   // state
   const [stateData, setStateData] = React.useState(initialData); 
   const [filteredData, setFilteredData] = React.useState<IFullFormData[] | undefined>(undefined); // the actual data to be shown
-  const [viewPage, setViewPage] = React.useState<viewPage>("Pending"); // page view filter
+  const [viewPage, setViewPage] = React.useState<viewPageType>("Pending"); // page view filter
   // context data
   const { email }: IUserData = useUserData();
   // notify
@@ -83,7 +79,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
       // approval page span multiple approvers
       // each page knows the approver they are fetching/updating from userdata > nav
       // get approver
-      fetchServer.getApproverList(email as string, mainPageView as approvalIndex)
+      fetchServer.getApproverList(email as string, mainPageViewState as approvalIndex)
         .then(result => {
           // map
           const _data: IFullFormData[] = result.map(item => convertSpDataToFormData(item));
@@ -103,9 +99,9 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
   React.useEffect(() => {
     if (stateData.status === "loaded" && stateData.data) {
       let approverTag = 
-        mainPageView === "Approver1" ? "approver1" : 
-        mainPageView === "Approver2" ? "approver2" :
-        mainPageView === "Approver3" ? "approver3" : "approver4";
+      mainPageViewState === "Approver1" ? "approver1" : 
+      mainPageViewState === "Approver2" ? "approver2" :
+      mainPageViewState === "Approver3" ? "approver3" : "approver4";
 
       if (viewPage === "full") {
         setFilteredData(stateData.data);
@@ -152,7 +148,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
   const _onLinkClick = (ev?: React.MouseEvent<HTMLElement>, item?: INavLink) =>  {
     ev?.preventDefault();
     if(item) {
-      setViewPage(item.key as viewPage);
+      setViewPage(item.key as viewPageType);
     }
   };
 
@@ -243,7 +239,7 @@ export default ({ mainPageView, setMainPageState, setFormSetting}:IComponentProp
         render: (item: IFullFormData) => 
         <ListContextualMenu 
           data={item}
-          approverPage={mainPageView}
+          approverPage={mainPageViewState}
           handleView={handleViewClick}
           enableApproval={true}
           onApproval={() => setStateData(prevValue => ({

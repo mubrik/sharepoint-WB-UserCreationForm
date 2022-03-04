@@ -3,7 +3,6 @@ import { IFullFormData } from "../../types/custom";
 // notify
 import { useNotification } from "../notification/NotificationBarContext";
 
-// techniclly not a component, just a function
 // basically takes the form data, runs a bunch of ifs check and returns and obj
 const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
   // pure func
@@ -90,9 +89,9 @@ const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
  * @param {IFullFormData, formMode, formIsTouched}
  */
 export const useValidateForm = (
-  formData:IFullFormData,
-  formMode: "new" | "readOnly" | "approval" | "edit", 
-  formIsTouched: boolean 
+    formData:IFullFormData,
+    formMode: "new" | "readOnly" | "approval" | "edit", 
+    formIsTouched: boolean 
   ): boolean => {
 
   const [validState, setValidState] = React.useState(false);

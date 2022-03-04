@@ -1,7 +1,7 @@
 // types
-import { IFullFormData, ISharepointFullFormData } from "../../types/custom"
+import { IFullFormData, ISharepointFullFormData } from "../../types/custom";
 /**
-* utility func to conver item from SP to form data
+* utility func to convert item from SharePoint to form data
 * main difference is the camelcasing, null items are converted to empty string/obj type
 * 
 */

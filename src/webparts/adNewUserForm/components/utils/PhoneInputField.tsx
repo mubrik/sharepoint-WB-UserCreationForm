@@ -1,11 +1,10 @@
 // for phone inputs
 import * as React from "react";
-import PhoneInput from 'react-phone-input-2'
-import 'react-phone-input-2/lib/high-res.css'
+import PhoneInput from 'react-phone-input-2';
+// css for styling
+import 'react-phone-input-2/lib/high-res.css';
 // ui
 import { Label } from "office-ui-fabric-react";
-// types
-import {IFullFormData} from "../../types/custom";
 
 interface IComponentProps {
   label: string;

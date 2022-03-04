@@ -10,6 +10,8 @@ interface IErrorState {
   errorMsg: string;
 }
 // if webpart encounters error that can lead to crash
+// class component cause componentDidCatch is a class comp method
+// https://stackoverflow.com/questions/48482619/how-can-i-make-use-of-error-boundaries-in-functional-react-components
 class ErrorBoundary extends React.Component<IErrorProps, IErrorState> {
 
   public state: IErrorState = {
@@ -28,7 +30,6 @@ class ErrorBoundary extends React.Component<IErrorProps, IErrorState> {
   }
 
   public componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    console.log("caught an err");
 
     console.error("Uncaught error:", error, info);
     // Display fallback UI
@@ -43,12 +44,14 @@ class ErrorBoundary extends React.Component<IErrorProps, IErrorState> {
         <div>
           <h4> Something went wrong </h4>
           <details style={{ whiteSpace: "pre-wrap" }}>
-              <summary style={{ cursor: "pointer", fontSize: "18px" }}> View error details 🐞 </summary>
-              <pre>
-                  {this.state.hasError && this.state.errorObj?.toString()}
-                  <br />
-                  {this.state.errorMsg}
-              </pre>
+            <summary style={{ cursor: "pointer", fontSize: "18px" }}> View error details 🐞 </summary>
+            <pre>
+              {this.state.hasError && this.state.errorObj?.toString()}
+              <br />
+              {this.state.errorMsg}
+              <br/>
+              {this.state.errorObj?.stack}
+            </pre>
           </details>
         </div>
       );
