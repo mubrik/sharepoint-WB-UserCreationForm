@@ -2,7 +2,8 @@
 import * as React from "react";
 import {
   Stack, Separator, Text,
-  StackItem, FontIcon, mergeStyleSets
+  StackItem, FontIcon, mergeStyleSets,
+  PrimaryButton
 } from "office-ui-fabric-react";
 // data
 import { IFullFormData, keysOfFullFormData,
@@ -30,6 +31,11 @@ import fetchServer from "../../controller/server";
 // utils
 import convertSpDataToFormData from "../utils/convertSpDataToFormData";
 import printDocument from "../utils/printDocument";
+// testing
+import { 
+  createUserLog, userLogExists, 
+  getUserLogData, updateUserLog 
+} from "../../controller/logger";
 
 // class style
 const classes = mergeStyleSets({
@@ -104,10 +110,10 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   const setDialog = useDialog();
 
   // testing
-  React.useEffect(() => {
-    // fetchServer.getSharepointApprovers("others")
-    // .then(res => console.log(res));
-  }, []);
+  // React.useEffect(() => {
+  //   // fetchServer.getSharepointApprovers("others")
+  //   // .then(res => console.log(res));
+  // }, []);
 
   // effect for fetching
   React.useEffect(() => {
@@ -339,6 +345,37 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
   //   // });
   // }
 
+  // handle testing click
+  
+  const handleTesting = async (): Promise<void> => {
+    if (email) {
+
+      if ( await userLogExists(email)) {
+        console.log("user log exist, getting it");
+        getUserLogData(email);
+
+        console.log("testing update");
+        const _dtString = Date.now().toString();
+
+        updateUserLog(email, {
+          listName: "testinggg",
+          userId: 333,
+          message: `testing update: ${_dtString}`,
+          actionType: "update"
+        });
+
+        // try updating
+      } else {
+        createUserLog(email, {
+          listName: "testinggg",
+          userId: 333,
+          message: "testing",
+          actionType: "create"
+        });
+      }
+    }
+  }
+
   return(
     <Stack tokens={{childrenGap : 8}} id="printable-document">
       <StackItem grow>
@@ -467,9 +504,9 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
           <ItemQueryActivity data={formData}/>
         </StackItem>
       }
-      {/* <StackItem>
-        <PrimaryButton text={"testing"} onClick={() => printDocument("printable-document")}/>
-      </StackItem> */}
+      <StackItem>
+        <PrimaryButton text={"testing"} onClick={handleTesting}/>
+      </StackItem>
     </Stack>
   );
 };
