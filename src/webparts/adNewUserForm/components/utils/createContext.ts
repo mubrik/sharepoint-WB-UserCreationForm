@@ -1,9 +1,10 @@
 import * as React from "react";
 /**
-* A helper to create a Context and Provider with no upfront default value, and
+* @description A helper to create a Context and Provider with no upfront default value, and
 * without having to check for undefined all the time.
+* @param contextName - Making this compulsory, easier to debug
 */
-const createTypeContext =  <ContextType extends unknown | null>(contextName?: string)
+const createTypeContext =  <ContextType extends unknown | null>(contextName: string)
     : readonly [() => ContextType, React.Provider<ContextType|undefined>] =>
   {
   // create a context using undefined, since no upfront value
@@ -19,7 +20,7 @@ const createTypeContext =  <ContextType extends unknown | null>(contextName?: st
 
     if (contextValue === undefined) {
       // throw
-      throw new Error(`useContext for ${Context.displayName} must be used in a provider wth a value`);
+      throw new Error(`useContext for ${Context.displayName} must be used in a provider with a value`);
     }
 
     return contextValue;

@@ -3,22 +3,46 @@ import * as React from "react";
 // server
 import fetchServer from "../../controller/server";
 // types
-import { IUserData } from "../../types/custom";
+// import { IUserData } from "../../types/custom";
+import { IUserApproverData } from "../../types/custom";
 // notification hook
 import { useNotification } from "../notification/NotificationBarContext";
 // custom context creator
 import createContext from "../utils/createContext";
 
-// context
-const [useUserData, UserProvider] = createContext<IUserData>();
-
-interface IComponentProps {
-  children: React.ReactNode;
+/**
+* @description Base user data. Must have id, email, displayname, manager and jobtitle
+*/
+export interface IUserData {
+  id?: number;
+  email?: string;
+  displayName?: string;
+  manager?: string;
+  jobTitle?: string;
 }
 
+// custom user data extended for specific webpart use, can be removed or retooled for different webpart
+interface IUserDataWithIsApproverData extends IUserData, IUserApproverData {
+
+}
+
+interface IComponentProps {
+  children?: React.ReactNode;
+}
+
+// context
+const [useUserData, UserProvider] = createContext<IUserDataWithIsApproverData>("UserDataContext");
+
+/**
+* @description UserData Context, default exports a context to be mounted and a hook to fetch user data of type { IUserData/CustomType }
+* @author Mubrik
+* @returns JSX.Element - The UserData Context Component
+* @requires useNotification - Notification dispatch object to notify for errors
+* @param React.ReactNode - children?
+*/
 export default ({children}: IComponentProps): JSX.Element => {
 
-  const [userData, setUserData] = React.useState<IUserData>({});
+  const [userData, setUserData] = React.useState<IUserDataWithIsApproverData>({} as IUserDataWithIsApproverData);
 
   // notify
   const notify = useNotification();

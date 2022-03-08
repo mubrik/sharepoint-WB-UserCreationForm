@@ -30,8 +30,14 @@ const initialState = {
 };
 
 const [useDialog, DialogProvider] =
-createContext<React.Dispatch<React.SetStateAction<IDialogState>>>();
+createContext<React.Dispatch<React.SetStateAction<IDialogState>>>("DialogModalContext");
 
+/**
+* @description Dialog Context, exports a context to be mounted and a hook to dispatch an object of type {IDialogState} to set a dialog/alert
+* @author Mubrik
+* @returns JSX.Element - The Context Component
+* @param React.ReactNode - children?
+*/
 export default ({ children }:IDialogProps) :JSX.Element => {
   // state
   const [dialogState, setDialogState] = React.useState<IDialogState>(initialState);

@@ -9,9 +9,11 @@ interface IErrorState {
   errorObj: Error|null;
   errorMsg: string;
 }
-// if webpart encounters error that can lead to crash
-// class component cause componentDidCatch is a class comp method
-// https://stackoverflow.com/questions/48482619/how-can-i-make-use-of-error-boundaries-in-functional-react-components
+/**
+* @description if webpart encounters error that can lead to crash, display this screen, class component cause componentDidCatch is a class comp method
+* @abstract https://stackoverflow.com/questions/48482619/how-can-i-make-use-of-error-boundaries-in-functional-react-components
+* @param React.ReactNode - children?
+*/
 class ErrorBoundary extends React.Component<IErrorProps, IErrorState> {
 
   public state: IErrorState = {

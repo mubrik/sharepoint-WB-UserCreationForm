@@ -1,4 +1,5 @@
 // jobless i know, urgh
+// About page component, for users to leave feedback about webpart
 import * as React from "react";
 // ui
 import {
@@ -12,6 +13,12 @@ import fetchServer from "../../controller/server";
 import { useUserData } from "../userContext/UserContext";
 import { useNotification } from "../notification/NotificationBarContext";
 
+/**
+* @description About page component, Renders a form for users to Rate and leave feedback about webpart
+* @author Mubrik
+* @requires UserContext&NotificationContext - UserContext must supply email address and Notifiction Context a ReactDispatch to set notification state
+* @returns JSX.Element - The about Page 
+*/
 const AboutPage = ():JSX.Element => {
   // states
   const [currentRating, setCurrentRating] = React.useState(1);
@@ -35,7 +42,7 @@ const AboutPage = ():JSX.Element => {
   };
 
   return (
-    <Stack tokens={{childrenGap: 8}} horizontalAlign={"center"}>
+    <Stack tokens={{ childrenGap: 8 }} horizontalAlign={"center"}>
       <Label>
         Webpart by IT applications, Rate and leave feedback!
       </Label>

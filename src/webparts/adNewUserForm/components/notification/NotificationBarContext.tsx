@@ -1,5 +1,5 @@
 import * as React from "react";
-// ui fabric
+// ui fabric.. not sure why this treeshaking is 183kb?? * 4 of react, sheesh
 import {
   MessageBar,
   MessageBarType, Stack
@@ -10,11 +10,11 @@ import createContext from "../utils/createContext";
 type NotificationType = "error" | "info" | "success" | "warning";
 
 interface INotificationBarProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export interface INotificationBarState {
-  show: boolean;
+  /** @description - show or hide notifiation*/ show: boolean;
   msg: string;
   isError?: boolean;
   errorObj?: Error|null;
@@ -31,8 +31,14 @@ const initialState = {
 };
 
 const [useNotification, NotificationProvider] =
-  createContext<React.Dispatch<React.SetStateAction<INotificationBarState>>>();
+  createContext<React.Dispatch<React.SetStateAction<INotificationBarState>>>("NotificationBarContext");
 
+/**
+* @description Notification Context, default exports a context to be mounted and a hook to dispatch an object of type {INotificationBarState} to display a notification
+* @author Mubrik
+* @returns JSX.Element - The Notification Context Component
+* @param React.ReactNode - children?
+*/
 export default ({children}:INotificationBarProps) :JSX.Element => {
   // state
   const [notifyState, setNotifyState] = React.useState<INotificationBarState>(initialState);

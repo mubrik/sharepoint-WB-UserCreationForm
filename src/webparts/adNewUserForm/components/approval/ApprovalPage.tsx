@@ -16,7 +16,7 @@ import { useUserData } from "../userContext/UserContext";
 import fetchServer from "../../controller/server";
 // types
 import { 
-  IUserData, mainPageView,
+  mainPageView,
   keysOfFullFormData, formSettings,
   approvalIndex, IFullFormData
 } from "../../types/custom";
@@ -66,7 +66,7 @@ export default ({ mainPageViewState, setMainPageState, setFormSetting}:IComponen
   const [filteredData, setFilteredData] = React.useState<IFullFormData[] | undefined>(undefined); // the actual data to be shown
   const [viewPage, setViewPage] = React.useState<viewPageType>("Pending"); // page view filter
   // context data
-  const { email }: IUserData = useUserData();
+  const { email } = useUserData();
   // notify
   const notify = useNotification();
   // responsive

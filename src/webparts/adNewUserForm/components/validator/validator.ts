@@ -3,7 +3,12 @@ import { IFullFormData } from "../../types/custom";
 // notify
 import { useNotification } from "../notification/NotificationBarContext";
 
-// basically takes the form data, runs a bunch of ifs check and returns and obj
+/**
+* @description basically takes a form data, runs a bunch of ifs check and returns an array
+* @author Mubrik
+* @param IFullFormData
+* @returns [isValid:boolean, isError:boolean, error:Error]
+*/ 
 const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
   // pure func
   const data = { ...param };
@@ -12,7 +17,7 @@ const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
   let isError = false;
   let errorMsg = "";
 
-  // data prop we dont really care much about
+  // form data props we dont really care much about
   const excludeProps = [
     "initials", "staffReplaced", "dangoteEmail",
     "comment", "hardware", "privateNumber", "approver1",
@@ -30,11 +35,11 @@ const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
     // wrapped to use boolean
     !(Object.entries(data).every((keyVal) => {
       const [key, value] = keyVal;
-      // if in excluded props return true so iteration continues
+      // if key in excluded props return true so iteration continues
       if (excludeProps.includes(key)) {
         return true;
       }
-      // value empty return false to stop loop, set variables
+      // if value empty set variables and return false to stop loop
       if (value === "") {
         errorMsg = `The field: ${key} cannot be empty`;
         isError = true;
@@ -85,11 +90,15 @@ const validator =  ( param: IFullFormData ): [boolean, boolean, string] => {
 };
 
 /**
- * basically runs validatation on formdata and returns a boolean
- * @param {IFullFormData, formMode, formIsTouched}
+ * @description runs validatation on formdata and returns a boolean, notifies if form data is invalid, error checking not implemented fully,
+ * so if form is bad will return false by default
+ * @returns boolean
+ * @author Mubrik
+ * @param IFullFormData.formMode.formIsTouched
+ * @requires useNotification - Notification dispatch object to notify for errors
  */
 export const useValidateForm = (
-    formData:IFullFormData,
+    formData: IFullFormData,
     formMode: "new" | "readOnly" | "approval" | "edit", 
     formIsTouched: boolean 
   ): boolean => {

@@ -9,7 +9,7 @@ import "@pnp/sp/sputilities";
 import { IEmailProperties } from "@pnp/sp/sputilities";
 // types
 import { 
-  IServer, IUserData,
+  IUserDataWithIsApproverData,
   IFullFormData,
   ISharepointFullFormData,
   mainPageView, ISharepointApprovalData,
@@ -23,7 +23,7 @@ type approvalIndex = "Approver1" | "Approver2"  |"Approver3" | "Approver4";
 
 
 /* handler for CRUD REST requests */
-class Server implements IServer{
+class Server {
 
   public fetch = sp;
   private adCreateList: IList;
@@ -52,7 +52,7 @@ class Server implements IServer{
     });
   }
 
-  public getUser = async ():Promise<IUserData> => {
+  public getUser = async ():Promise<IUserDataWithIsApproverData> => {
 
     try {
       const userDetails = 
@@ -100,7 +100,6 @@ class Server implements IServer{
 
       // approver data
       const _userRoles = await this.getUserRoles(profile.Email as string);
-
 
       // return
       return {

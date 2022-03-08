@@ -11,7 +11,6 @@ import { IFullFormData, keysOfFullFormData,
 // query
 import { useMediaQuery } from "react-responsive";
 // validator
-import validator from "../validator/validator";
 import { useValidateForm } from "../validator/validator";
 // custom comp
 import UserInfoForm from "./UserInfoForm";
@@ -31,6 +30,24 @@ import fetchServer from "../../controller/server";
 // utils
 import convertSpDataToFormData from "../utils/convertSpDataToFormData";
 import printDocument from "../utils/printDocument";
+
+// class style
+const classes = mergeStyleSets({
+  seperatorHeight: {
+    height: "400px"
+  },
+  body: {
+    padding: "6px",
+    border: "1px solid #edebe9",
+    borderRadius: "8px"
+  },
+  header: {
+    marginBottom: "4px"
+  },
+  iconColor: {
+    color: "#004e8c"
+  }
+});
 
 // initial form data
 const initialMainFormData: IFullFormData  = {
@@ -60,31 +77,10 @@ const initialMainFormData: IFullFormData  = {
   hardware: "",
 };
 
-// layout type
-type paneLayoutState = "double" | "single";
-
 interface IComponentProps {
   formSetting: formSettings;
   setFormSetting: React.Dispatch<React.SetStateAction<formSettings>>;
 }
-
-// class style
-const classes = mergeStyleSets({
-  seperatorHeight: {
-    height: "400px"
-  },
-  body: {
-    padding: "6px",
-    border: "1px solid #edebe9",
-    borderRadius: "8px"
-  },
-  header: {
-    marginBottom: "4px"
-  },
-  iconColor: {
-    color: "#004e8c"
-  }
-});
 
 export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element => {
 
@@ -192,7 +188,7 @@ export default ({ formSetting, setFormSetting }: IComponentProps): JSX.Element =
       // testing, fetch approver and update at same time, save on re render?
       if (field.toLowerCase().includes("office") && typeof value === "string" && value !== "") {
         // var
-        let _approver = "";
+        let _approver = "No Approver for this SBU Set";
 
         fetchServer.getApproverByOffice(value)
           .then(result => {

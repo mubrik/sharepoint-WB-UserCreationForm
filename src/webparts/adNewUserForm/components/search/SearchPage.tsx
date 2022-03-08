@@ -11,7 +11,7 @@ import { ListView,
 } from "@pnp/spfx-controls-react/lib/ListView";
 // types
 import { formSettings, mainPageView,
-  ISharepointFullFormData, IFullFormData
+  IFullFormData
 } from "../../types/custom";
 // data
 import { 

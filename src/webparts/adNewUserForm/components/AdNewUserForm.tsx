@@ -27,6 +27,10 @@ export const WebpartContext = React.createContext<IWebPartData>({
   webpartWidth:720
 });
 
+/**
+* @description main component rendered on the webpart root dom
+* @author Mubrik
+*/
 export default ({ context, webpartWidth}: IPageProps): JSX.Element => {
   // state for the component being viewed except nav
   const [viewPage, setViewPage] = React.useState<mainPageView>("new");

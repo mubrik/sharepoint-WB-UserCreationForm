@@ -1,4 +1,5 @@
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
+import type { IUserData } from '../components/userContext/UserContext';
 
 export type mainPageView = "new" | "about" | "Approver1" | "Approver2"  |"Approver3" | "Approver4" | "search";
 export type NotificationType = "error" | "info" | "success" | "warning";
@@ -24,23 +25,8 @@ export interface IUserApproverData {
   isUserApproverFour?: boolean;
 }
 
-export interface IUserData extends IUserApproverData {
-  ok?: boolean;
-  id?: number;
-  email?: string;
-  displayName?: string;
-  manager?: string;
-  jobTitle?: string;
-}
+export interface IUserDataWithIsApproverData extends IUserData, IUserApproverData {
 
-export interface IServer {
-  fetch: typeof sp;
-  testing(): Promise<void>;
-  getUser(): Promise<IUserData>;
-  sendFeedback(
-    email: string,
-    rating: number,
-    feedback: string): Promise<boolean>;
 }
 
 export interface IWebPartData {
